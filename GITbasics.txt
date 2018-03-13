@@ -1,0 +1,66 @@
+SKROT NAJWAZNIEJSZYCH KOMEND GITOWYCH
+
+Polecam przeczytac:
+https://git-scm.com/book/en/v2
+
+Rozdzial 2 i poczatek 3 to podstawa. Reszte mozna sobie na razie odpuscic.
+
+
+1)
+Zeby pobrac repozytorium na dysk wpisujemy:
+
+git clone <adres do repo>
+
+tutaj adres to: https://github.com/Rav2/HEPMachineLearning.git
+
+2)
+Pracujemy na "branchach". Glowny branch nazywa sie "master". Powinnien tam
+trafiac sprawdzony i przetestowany kod. Roboczy kod powinien trafiac na
+osobne branche, z ktorych bedzie pozniej "mergowany" do mastera.
+Nowy branch robimy tak:
+
+git branch <nazwa brancha>
+
+miedzy branchami przelaczamy sie tak:
+
+git checkout <nazwa brancha>
+
+3) Pracujemy sobie, pracujemy. Do zobaczenia co naprodukowalismy sluzy
+
+git status
+
+zeby anulowac zmiany pliku piszemy
+
+git checkout -- <nazwa pliku>
+
+natomiast zeby dodac zmiany do "commita" piszemy
+
+git add <nazwa pliku>
+
+
+4) Jak juz mamy wszystko dodane albo anulowane to robimy tzw. commit, czyli migawke:
+
+git commit -m "Tu jest tresc naszego commita. Piszemy co zrobilismy. Piszemy
+po angielsku. Niepiszemy DUPA."
+
+5) Commit "zapisuje" nam wersje projektu w lokalnym repo (na dysku). Trzeba
+jeszcze popchnac to na serwer:
+
+git push origin
+
+6)
+
+Zanim zaczniemy prace, sprawdzamy co ktos inny zrobil w miedzyczasie:
+
+git pull
+
+PRZYKLAD PRACY:
+
+git checkout development
+git pull
+<skrobu skrobu w pliku wazne.py i niewazne.py>
+git checkout -- niewazne.py
+git add wazne.py
+git status
+git commit -m "Way to find Higgs added to wazne.py"
+git push origin
