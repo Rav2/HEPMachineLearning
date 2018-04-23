@@ -1,6 +1,5 @@
 Wymagania to tensorflow zainstalowany tak jak na ich stronie kaza z conda
-na pythonie 3.5 (pewnie nowszy tez dziala, nie udalo mi sie zainstalowac 
-tensorflow 3.4 przy pomocy conda polecenia, wiec zainstalowalem 3.5)
+na pythonie 3 iles
 
 matplotlib, scikit learn 
 

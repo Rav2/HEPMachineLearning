@@ -526,7 +526,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "dane_treningowe"
+        string_val: "dane_treningowe2"
       }
     }
   }
@@ -749,7 +749,7 @@ node {
         dtype: DT_INT64
         tensor_shape {
         }
-        int64_val: 100
+        int64_val: 128
       }
     }
   }
@@ -788,6 +788,14 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
         }
       }
     }
@@ -796,6 +804,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
       }
@@ -933,7 +942,7 @@ node {
     key: "f"
     value {
       func {
-        name: "tf_map_func_b9ef71be"
+        name: "tf_map_func_2a602070"
       }
     }
   }
@@ -947,6 +956,11 @@ node {
           }
         }
         shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
         }
       }
     }
@@ -955,6 +969,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
       }
@@ -995,6 +1010,11 @@ node {
           }
         }
         shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
         }
       }
     }
@@ -1003,6 +1023,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
       }
@@ -1047,6 +1068,11 @@ node {
           }
         }
         shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
         }
       }
     }
@@ -1055,6 +1081,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
       }
@@ -1099,6 +1126,14 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
         }
       }
     }
@@ -1107,6 +1142,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
       }
@@ -1161,6 +1197,14 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
         }
       }
     }
@@ -1181,6 +1225,14 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
         }
       }
     }
@@ -1190,13 +1242,14 @@ node {
     value {
       list {
         type: DT_FLOAT
+        type: DT_FLOAT
         type: DT_INT64
       }
     }
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/Shape"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/Shape"
   op: "Shape"
   input: "IteratorGetNext"
   attr {
@@ -1225,7 +1278,7 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/strided_slice/stack"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice/stack"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -1261,7 +1314,7 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/strided_slice/stack_1"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice/stack_1"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -1297,7 +1350,7 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/strided_slice/stack_2"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice/stack_2"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -1333,12 +1386,12 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/strided_slice"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice"
   op: "StridedSlice"
-  input: "dnn/input_from_feature_columns/input_layer/feature/Shape"
-  input: "dnn/input_from_feature_columns/input_layer/feature/strided_slice/stack"
-  input: "dnn/input_from_feature_columns/input_layer/feature/strided_slice/stack_1"
-  input: "dnn/input_from_feature_columns/input_layer/feature/strided_slice/stack_2"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/Shape"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice/stack"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice/stack_1"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice/stack_2"
   attr {
     key: "Index"
     value {
@@ -1392,7 +1445,7 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/Reshape/shape/1"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/Reshape/shape/1"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -1422,10 +1475,10 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/Reshape/shape"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/Reshape/shape"
   op: "Pack"
-  input: "dnn/input_from_feature_columns/input_layer/feature/strided_slice"
-  input: "dnn/input_from_feature_columns/input_layer/feature/Reshape/shape/1"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/strided_slice"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/Reshape/shape/1"
   attr {
     key: "N"
     value {
@@ -1458,10 +1511,10 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/feature/Reshape"
+  name: "dnn/input_from_feature_columns/input_layer/dwuwektor/Reshape"
   op: "Reshape"
   input: "IteratorGetNext"
-  input: "dnn/input_from_feature_columns/input_layer/feature/Reshape/shape"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/Reshape/shape"
   attr {
     key: "T"
     value {
@@ -1491,7 +1544,302 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/concat/concat_dim"
+  name: "dnn/input_from_feature_columns/input_layer/losowa/Shape"
+  op: "Shape"
+  input: "IteratorGetNext:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice/stack"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 0
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice/stack_1"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice/stack_2"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice"
+  op: "StridedSlice"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/Shape"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice/stack"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice/stack_1"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice/stack_2"
+  attr {
+    key: "Index"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/losowa/Reshape/shape/1"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/losowa/Reshape/shape"
+  op: "Pack"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/strided_slice"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/Reshape/shape/1"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/losowa/Reshape"
+  op: "Reshape"
+  input: "IteratorGetNext:1"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/Reshape/shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/concat/axis"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -1522,12 +1870,26 @@ node {
 }
 node {
   name: "dnn/input_from_feature_columns/input_layer/concat"
-  op: "Identity"
-  input: "dnn/input_from_feature_columns/input_layer/feature/Reshape"
+  op: "ConcatV2"
+  input: "dnn/input_from_feature_columns/input_layer/dwuwektor/Reshape"
+  input: "dnn/input_from_feature_columns/input_layer/losowa/Reshape"
+  input: "dnn/input_from_feature_columns/input_layer/concat/axis"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
   attr {
     key: "T"
     value {
       type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
     }
   }
   attr {
@@ -1539,7 +1901,7 @@ node {
             size: -1
           }
           dim {
-            size: 2
+            size: 3
           }
         }
       }
@@ -1585,7 +1947,7 @@ node {
             size: 2
           }
         }
-        tensor_content: "\002\000\000\000\n\000\000\000"
+        tensor_content: "\003\000\000\000\n\000\000\000"
       }
     }
   }
@@ -1623,7 +1985,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
         }
-        float_val: -0.7071067690849304
+        float_val: -0.6793662309646606
       }
     }
   }
@@ -1661,7 +2023,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
         }
-        float_val: 0.7071067690849304
+        float_val: 0.6793662309646606
       }
     }
   }
@@ -1690,7 +2052,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -1772,7 +2134,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -1807,7 +2169,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -1834,7 +2196,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -1860,7 +2222,7 @@ node {
     value {
       shape {
         dim {
-          size: 2
+          size: 3
         }
         dim {
           size: 10
@@ -1900,7 +2262,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -1946,7 +2308,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -2219,7 +2581,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -4081,7 +4443,7 @@ node {
 node {
   name: "dnn/head/labels/ExpandDims"
   op: "ExpandDims"
-  input: "IteratorGetNext:1"
+  input: "IteratorGetNext:2"
   input: "dnn/head/labels/ExpandDims/dim"
   attr {
     key: "T"
@@ -9443,7 +9805,7 @@ node {
             size: -1
           }
           dim {
-            size: 2
+            size: 3
           }
         }
       }
@@ -9479,7 +9841,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -9535,7 +9897,7 @@ node {
             size: -1
           }
           dim {
-            size: 2
+            size: 3
           }
         }
       }
@@ -9567,7 +9929,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -9594,7 +9956,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -9616,7 +9978,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -9644,7 +10006,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -9670,7 +10032,7 @@ node {
     value {
       shape {
         dim {
-          size: 2
+          size: 3
         }
         dim {
           size: 10
@@ -9710,7 +10072,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -9756,7 +10118,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -10354,7 +10716,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -13522,7 +13884,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_327aa91b42d945f08e9737d494516705/part"
+        string_val: "_temp_e03c374f1c79407d92def44441c39393/part"
       }
     }
   }
@@ -13711,8 +14073,8 @@ node {
         }
         string_val: "10 0,10"
         string_val: "10 0,10"
-        string_val: "2 10 0,2:0,10"
-        string_val: "2 10 0,2:0,10"
+        string_val: "3 10 0,3:0,10"
+        string_val: "3 10 0,3:0,10"
         string_val: "1 0,1"
         string_val: "1 0,1"
         string_val: "10 1 0,10:0,1"
@@ -13937,8 +14299,8 @@ node {
         }
         string_val: "10 0,10"
         string_val: "10 0,10"
-        string_val: "2 10 0,2:0,10"
-        string_val: "2 10 0,2:0,10"
+        string_val: "3 10 0,3:0,10"
+        string_val: "3 10 0,3:0,10"
         string_val: "1 0,1"
         string_val: "1 0,1"
         string_val: "10 1 0,10:0,1"
@@ -13971,7 +14333,7 @@ node {
         }
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -13979,7 +14341,7 @@ node {
         }
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -14147,7 +14509,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -14194,7 +14556,7 @@ node {
       list {
         shape {
           dim {
-            size: 2
+            size: 3
           }
           dim {
             size: 10
@@ -14528,13 +14890,17 @@ library {
   }
   function {
     signature {
-      name: "tf_map_func_b9ef71be"
+      name: "tf_map_func_2a602070"
       input_arg {
         name: "arg0"
         type: DT_STRING
       }
       output_arg {
         name: "ParseSingleExample/ParseSingleExample"
+        type: DT_FLOAT
+      }
+      output_arg {
+        name: "ParseSingleExample/ParseSingleExample_o2"
         type: DT_FLOAT
       }
       output_arg {
@@ -14588,17 +14954,41 @@ library {
       }
     }
     node_def {
+      name: "ParseSingleExample/Const_2"
+      op: "Const"
+      attr {
+        key: "dtype"
+        value {
+          type: DT_FLOAT
+        }
+      }
+      attr {
+        key: "value"
+        value {
+          tensor {
+            dtype: DT_FLOAT
+            tensor_shape {
+              dim {
+              }
+            }
+          }
+        }
+      }
+    }
+    node_def {
       name: "ParseSingleExample/ParseSingleExample"
       op: "ParseSingleExample"
       input: "arg0"
       input: "ParseSingleExample/Const:output:0"
       input: "ParseSingleExample/Const_1:output:0"
+      input: "ParseSingleExample/Const_2:output:0"
       attr {
         key: "Tdense"
         value {
           list {
             type: DT_FLOAT
             type: DT_INT64
+            type: DT_FLOAT
           }
         }
       }
@@ -14606,8 +14996,9 @@ library {
         key: "dense_keys"
         value {
           list {
-            s: "feature"
+            s: "dwuwektor"
             s: "label"
+            s: "losowa"
           }
         }
       }
@@ -14621,6 +15012,11 @@ library {
               }
             }
             shape {
+            }
+            shape {
+              dim {
+                size: 1
+              }
             }
           }
         }
@@ -14653,6 +15049,10 @@ library {
     ret {
       key: "ParseSingleExample/ParseSingleExample_o1"
       value: "ParseSingleExample/ParseSingleExample:dense_values:1"
+    }
+    ret {
+      key: "ParseSingleExample/ParseSingleExample_o2"
+      value: "ParseSingleExample/ParseSingleExample:dense_values:2"
     }
   }
 }
