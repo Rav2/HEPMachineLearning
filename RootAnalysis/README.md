@@ -8,6 +8,11 @@ by A. Kalinowski <Faculty of Physics, Univeristy of Warsaw>
 
 * Follow the provided instructions to install the analysis. Make sure you can compile and run it.
 * Copy folder RootAnalysis from this repository and swap files.
-* Re-compile and re-run HTTAnalysis.
-* You should obtain a file as output with TTree in it. The file should be in HTTAnalysis/output/
+* Re-run cmake,  re-compile and re-run HTTAnalysis.
+* You should obtain a file as output with TTree in it. The file should be in folder specified by htt_MuTau.ini
+
+## Specifying parameters to extract
+
+To specify which particle properties and for which particles to extract, see 
+file HTTAnalysis/ml_Properties.ini
 

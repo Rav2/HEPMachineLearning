@@ -29,8 +29,10 @@
 #include "TObject.h"
 
 
-// prints the explanatory string of an exception. If the exception is nested,
-// recurses to print the explanatory of the exception it holds
+/*! 
+*	Prints the explanatory string of an exception. If the exception is nested,
+*	recurses to print the explanatory of the exception it holds
+*/
 void print_exception(const std::exception& e, int level =  0)
 {
     std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
@@ -99,6 +101,7 @@ int main(int argc, char ** argv)
 
 		 TreeAnalyzer *tree = new TreeAnalyzer("TreeAnalyzer",cfgFileName, myEvent);
 		 tree->setObjectMessenger(new MLObjectMessenger("MLObjectMessenger created in HTTAnalysis.cc"));
+		 // std::cout<<"####################INIT: analyzers: "<<myAnalyzers.size()<<std::endl;
 		 tree->init(myAnalyzers);
 		 int nEventsAnalysed = tree->loop();
 		 tree->finalize();

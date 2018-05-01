@@ -1,3 +1,13 @@
+//! Class for extracting data for further ML processing in python.
+/*!
+  \author Rafal Maselek
+  \date May 2018
+  
+  This class extracts four-momenta of legs and jets from the analysis, together with some global parameters
+  and particles' properties. Data is written to a TTree in "Summary" branch of the main analysis file. It
+  can be then exported to python and TensorFlow.
+*/
+
 #include "MLAnalyzer.h"
 #include <utility>
 #include "boost/property_tree/ptree.hpp"
@@ -5,10 +15,14 @@
 #include "boost/tokenizer.hpp"
 #include "boost/functional/hash.hpp"
 
-
-MLAnalyzer::MLAnalyzer(const std::string & aName, const std::string & aDecayMode = "None") :
-myName_(aName)
+//! Constructor
+/*!
+*	Constructor that creates an objects and launches parser of config file. To edit the name of the config file
+*   edit the variable "cfgFileName". If parser fails, the program execution continues, only warning is thrown.
+*/
+MLAnalyzer::MLAnalyzer(const std::string & aName, const std::string & aDecayMode = "None") : Analyzer(aName)
 {
+	std::cout<<"[ML]\tCreation of MLAnalyzer object."<<std::endl;
 	execution_counter_=0;
 	MLTree_=NULL;
 	cfgFileName = "ml_Properties.ini";
@@ -23,17 +37,38 @@ myName_(aName)
 	}
 }
 
+//! Dummy destructor
 MLAnalyzer::~MLAnalyzer()
 {
+	std::cout<<"[ML]\t MLAnalyzer finished working."<<std::endl;
 }
 
+//! Clears the member field collections
+void MLAnalyzer::clear()
+{
+	legs_p4_.clear();
+	jets_p4_.clear();
+	params_.clear();
+	params_legs_.clear();
+	params_jets_.clear();
+}
+
+//! Config file parser
+/*!
+*	Parser for config file containing properties of particles (legs and/or jets) to be extracted.
+*	Parses uses boost library, it's the same mechanism as for loading other *.ini files in the analysis.
+*	Throws some exceptions, which might be useful for debugging. However, in release version the exceptions
+*	are catched (in constructor, this is where the function is called) and a cerr warning is generated, 
+*	the execution continues. Fail of the parses should not kill the analysis.
+*/
 void MLAnalyzer::parseCfg(const std::string & cfgFileName)
 {
+  std::cout<<"[ML]\tParsing external file with particle properties selections."<<std::endl;
   boost::property_tree::ptree pt;
   boost::property_tree::ini_parser::read_ini(cfgFileName, pt);
 
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  boost::char_separator<char> sep(", ");
+  boost::char_separator<char> sep(", "); /*!< separator for strings */
 
   // loop over all possible properties
   for(auto it=PropertyEnumString::enumMap.begin(); it!=PropertyEnumString::enumMap.end(); ++it)
@@ -47,26 +82,28 @@ void MLAnalyzer::parseCfg(const std::string & cfgFileName)
   	}
   	std::string str = static_cast<std::string>(*str_opt);
   	tokenizer tokens(str, sep);
+  	// parse tokens
   	for (auto it: tokens) 
 	{
-		if("l"==it.substr(0,1))
+		
+		if("l"==it.substr(0,1)) // if token starts with 'l'
 		{
 			auto iter = params_legs_.find(property);
 			if (iter == params_legs_.end())
 			{
 				std::set<unsigned> s;
-			    params_legs_[property]=s;
+			    params_legs_[property]=s; // create new collection for given property
 			}
 
 			if(it.size()==1)
-				params_legs_[property].insert(1000); // dummy value
+				params_legs_[property].insert(1000); // dummy value, will be removed after calling fixSelections()
 			else
 			{
 				unsigned val = std::stoul(it.substr(1));
 				params_legs_[property].insert(val);
 			}
 		}
-		else if("j"==it.substr(0,1))
+		else if("j"==it.substr(0,1)) // if token starts with 'j'
 		{
 			auto iter = params_jets_.find(property);
 			if (iter == params_jets_.end())
@@ -76,48 +113,62 @@ void MLAnalyzer::parseCfg(const std::string & cfgFileName)
 			}
 
 			if(it.size()==1)
-				params_jets_[property].insert(1000); // dummy value
+				params_jets_[property].insert(1000); // dummy value, will be removed after calling fixSelections()
 			else
 			{
 				unsigned val = std::stoul(it.substr(1));
-				params_jets_[property].insert(val);
+				params_jets_[property].insert(val);	// create new collection for given property
 			}
 		}
-		else
+		else // unsupported argument
 			throw std::invalid_argument(std::string("[ERROR] WRONG SELECTOR FOR PARTICLE PROPERTY! PROPERTY: ")+\
 				property+std::string(" SELECTOR: ")+it);
 	}
   }
+  std::cout<<"[ML]\tParsing successful!"<<std::endl;
 }
 
+//! Fixes the selections parsed using parses
+/*!
+*	Parses accepts an option to extract a given property for all legs/jets. However, when parses is called,
+*	the total number of legs/jets per event is unknown. Parses sets a dummy selection number to 1000.
+*	This function remove that value and places values for all leg/jets instead.
+*/
 void MLAnalyzer::fixSelections()
 {
 	for (auto it=params_legs_.begin(); it!=params_legs_.end(); ++it)
 	{
-		auto search = (it->second).find(1000);
+		auto search = (it->second).find(1000); // Check if there is a dummy value.
 		if(search != (it->second).end())
 		{
-			(it->second).erase(search);
+			(it->second).erase(search); // Remove dummy value
 			for(unsigned ii=1; ii<=legs_no_; ii++)
 			{
-				(it->second).insert(ii);
+				(it->second).insert(ii);	// Insert indices of all legs
 			}
 		}
 	}
 	for (auto it=params_jets_.begin(); it!=params_jets_.end(); ++it)
 	{
-		auto search = (it->second).find(1000);
+		auto search = (it->second).find(1000); // Check if there is a dummy value.
 		if(search != (it->second).end())
 		{
-			(it->second).erase(search);
-			for(unsigned ii=1; ii<=legs_no_; ii++)
+			(it->second).erase(search);	// Remove dummy value
+			for(unsigned ii=1; ii<=jets_no_; ii++)
 			{
-				(it->second).insert(ii);
+				(it->second).insert(ii); // Insert indices of all jets
 			}
 		}
 	}
 }
 
+//! Adds branches to a TTree in the output file of the analysis
+/*! Adds branches to the TTree that will be created in the output file of the analysis.
+*	Inherited interface deals with the details.
+*	The function will be called twice, one after constructor (default behavior), another one by analyze().
+*	It is required, because at the moment of creation MLAnalyzer does not know how many variables are to
+*	be extracted to the tree. The if inside function switches different behavior for mentioned situations.
+*/
 void MLAnalyzer::addBranch(TTree *tree)
 {
 
@@ -128,6 +179,7 @@ void MLAnalyzer::addBranch(TTree *tree)
 		{
 			// Adding branches for global parameters and saving the address of TTree
 			MLTree_ = tree;
+			std::cout<<"[ML]\tAdding global parameter branches for ML analysis."<<std::endl;
 			tree->Branch("visMass", &visMass_);
 			tree->Branch("higgsMassTrans", &higgsMassTrans_);
 			tree->Branch("higgsPT", &higgsPT_);
@@ -137,33 +189,37 @@ void MLAnalyzer::addBranch(TTree *tree)
 	}
 	else
 	{
+
 		// Will execute once during the first call of MLAnalyzer::analyze()
+		std::cout<<"[ML]\tAdding more branches for ML analysis."<<std::endl;
 		std::string leg_s ("leg_");
 		std::string jet_s ("jet_");
 		std::string endings[4]={"_E", "_pX", "_pY", "_pZ"};
 		try
 		{
+			// create branches for four-momenta of legs
 			for(unsigned ii=0; ii<legs_p4_.size();ii++)
 			{
 				std::string name = leg_s+std::to_string(ii/4+1)+endings[ii%4];
 				tree->Branch(name.c_str(), &legs_p4_.at(ii));
 
 			}
+			// create branches for four-momenta of jets
 			for(unsigned ii=0; ii<jets_p4_.size();ii++)
 			{
 				std::string name = jet_s+std::to_string(ii/4+1)+endings[ii%4];
 				tree->Branch(name.c_str(), &jets_p4_.at(ii));
 			}
 
-			
+			// create branches for particle properties for legs
 			for (auto it=params_legs_.begin(); it!=params_legs_.end(); ++it)
 			{
 				std::string name = it->first;
 				std::set<unsigned> selected_legs = it->second;
 				for(auto sel=selected_legs.begin(); sel!=selected_legs.end(); ++sel)
 				{
-					unsigned no = *sel;
-					if(no > legs_no_ || no==0)
+					unsigned no = *sel; /*!< number of selected leg */
+					if(no > legs_no_ || no==0) // if the number doesn't match data from MLObjectMessenger
 					{
 						std::cerr<<"[ML][WARNING]\tRequest to add branch for params for leg with larger number than accessible (or zero). I will ignore the request."<<std::endl;
 					}
@@ -175,14 +231,15 @@ void MLAnalyzer::addBranch(TTree *tree)
 
 				}
 			}
+			// create branches for particle properties for legs
 			for (auto it=params_jets_.begin(); it!=params_jets_.end(); ++it)
 			{
 				std::string name = it->first;
 				std::set<unsigned> selected_jets = it->second;
 				for(auto sel=selected_jets.begin(); sel!=selected_jets.end(); ++sel)
 				{
-					unsigned no = *sel;
-					if(no > jets_no_ || no==0)
+					unsigned no = *sel; /*!< number of selected jet */
+					if(no > jets_no_ || no==0) // if the number doesn't match data from MLObjectMessenger
 					{
 						std::cerr<<"[ML][WARNING]\tRequest to add branch for params for jet with larger number than accessible (or zero). I will ignore the request."<<std::endl;
 					}
@@ -207,24 +264,30 @@ void MLAnalyzer::addBranch(TTree *tree)
 		}
 }
 
-
+//! Populate member field collections with variables that will serve as bufors for saving data to TTree
+/*! 
+*	This function will check what bufors are needed for saving data to TTree and will populate member field
+*	collections with apropriate variables. Deals with four-momenta and particle properties. Global variables
+* 	have their own bufor, not in any collection. 
+*/
 void MLAnalyzer::prepareVariables(const std::vector<const HTTParticle*>* legs, const std::vector<const HTTParticle*>* jets)
 {
 	try
 	{
+		std::cout<<"[ML]\tCreating bufors for data extraction."<<std::endl;
 		/*** FOUR-MOMENTA ***/
 		for(unsigned leg=0; leg<legs->size();leg++)
 			for(unsigned coord=0; coord<4; coord++)
 			{
 				double x = 0.0;
-				legs_p4_.push_back(x);
+				legs_p4_.push_back(x); // add bufors to legs_p4_
 
 			}
 		for(unsigned jet=0; jet<jets->size();jet++)
 			for(unsigned coord=0; coord<4; coord++)
 			{
 				double x = 0.0;
-				jets_p4_.push_back(x);
+				jets_p4_.push_back(x); // add bufors to jets_p4_
 			}
 		/*** PARTICLE PROPERTIES ***/
 		for (auto it=params_legs_.begin(); it!=params_legs_.end(); ++it)
@@ -236,7 +299,7 @@ void MLAnalyzer::prepareVariables(const std::vector<const HTTParticle*>* legs, c
 				double x = 0.0;
 				v.push_back(x);
 			}
-			params_[std::string("legs_")+name] = v;
+			params_[std::string("legs_")+name] = v; // add bufors to params_
 		}
 		for (auto it=params_jets_.begin(); it!=params_jets_.end(); ++it)
 		{
@@ -247,7 +310,7 @@ void MLAnalyzer::prepareVariables(const std::vector<const HTTParticle*>* legs, c
 				double x = 0.0;
 				v.push_back(x);
 			}
-			params_[std::string("jets_")+name] = v;
+			params_[std::string("jets_")+name] = v; // add bufors to params_
 		}
 	}
 	catch(const std::out_of_range& e)
@@ -261,6 +324,7 @@ void MLAnalyzer::prepareVariables(const std::vector<const HTTParticle*>* legs, c
 
 }
 
+//! Reads particle four-momentum from TLorentzVector and assigns apropriate values to bufors in member field collections.
 void MLAnalyzer::extractP4(const TLorentzVector& v, const std::string destination, const unsigned no)
 {
 	try
@@ -292,6 +356,7 @@ void MLAnalyzer::extractP4(const TLorentzVector& v, const std::string destinatio
 	} 
 }
 
+//! Reads particle properties and assigns apropriate values to bufors in member field collections.
 void MLAnalyzer::extractParticleProperties( const std::vector<const HTTParticle*>* legs,  const std::vector<const HTTParticle*>* jets)
 {
 	try
@@ -301,7 +366,6 @@ void MLAnalyzer::extractParticleProperties( const std::vector<const HTTParticle*
 		for (auto it=params_legs_.begin(); it!=params_legs_.end(); ++it)
 		{
 			std::string name = it->first;
-			// std::cout<<"NAME: "<<name<<" ORIGINAL: "<<it->first<<std::endl;
 			for(auto iter = (it->second).begin(); iter != (it->second).end(); ++iter)
 			{
 				unsigned no = *iter;
@@ -320,6 +384,8 @@ void MLAnalyzer::extractParticleProperties( const std::vector<const HTTParticle*
 	} 
 		
 }
+
+//! Calculates and fill member fields (bufors) for quantities specific to HTT analysis -- global parameters.
 void MLAnalyzer::globalsHTT(const MLObjectMessenger* mess, const std::vector<const HTTParticle*>* legs, const HTTAnalysis::sysEffects* aSystEffect)
 {
 	try
@@ -335,6 +401,7 @@ void MLAnalyzer::globalsHTT(const MLObjectMessenger* mess, const std::vector<con
 
 		if(!(leg1 && leg2 && aMET && aSystEffect && bs && higgs_mass && nJets))
 			throw std::logic_error("[ERROR] NULL POINTERS PRESENT!");
+		// Calculation and assignement of global parameters
 		const TLorentzVector & aVisSum = leg1->getP4(*aSystEffect) + leg2->getP4(*aSystEffect);
 	    visMass_ = aVisSum.M();
 	    higgsPT_ =  (aVisSum + aMET->getP4(*aSystEffect)).Pt();
@@ -356,40 +423,42 @@ void MLAnalyzer::globalsHTT(const MLObjectMessenger* mess, const std::vector<con
 	} 
 }
 
-
+//! The main function of the class, analyzes the event -- extracts necessary data to a TTree
+/*!
+*	The function executes for each event and takes a pointer to MLObjectMessenger object. If the latter is not NULL,
+*	it will proceed to extract data: legs and jets four-momenta, particle properties loaded from external file and
+*	a few gloabl parameters for HTT analysis. One can easily get rid of the latter (or change to something else) by
+*	commenting out the call of globalsHTT() function.	
+*/
 bool MLAnalyzer::analyze(const EventProxyBase& iEvent, ObjectMessenger *aMessenger)
 {
 	try
 	{
-		// std::cout<<(int)PropertyEnumString::enumMap.at(std::string("charge"))<<" "<<execution_counter_<<std::endl;
-
-		if(aMessenger and std::string("MLObjectMessenger").compare(0,17,aMessenger->name()))
+		if(aMessenger and std::string("MLObjectMessenger").compare(0,17,aMessenger->name())) // if NULL it will do nothing
 		{
-			void* p = NULL;
-			MLObjectMessenger* mess = ((MLObjectMessenger*)aMessenger);
+			void* p = NULL; /*!< pointer that will be cast to apropriate type if needed */
+			MLObjectMessenger* mess = ((MLObjectMessenger*)aMessenger); 
 			const std::vector<const HTTParticle*>* legs = mess->getObjectVector(static_cast<HTTParticle*>(p), std::string("legs"));
 			const std::vector<const HTTParticle*>* jets = mess->getObjectVector(static_cast<HTTParticle*>(p), std::string("jets"));
 			const HTTAnalysis::sysEffects* aSystEffect = mess->getObject(static_cast< HTTAnalysis::sysEffects*>(p), std::string("systEffect"));
 
-			//TODO: uzyc parsera z boosta albo poszukac czy w std cos jest
-			// parametry dla jetow i legow
 			if(mess && aSystEffect && legs && jets)
 			{
-				if(execution_counter_ == 0)
+				if(execution_counter_ == 0) // will execute only once at the beginning
 				{
+					std::cout<<"[ML]\tMLAnalyzer starts working."<<std::endl;
 					// Number of leg and jet object must be constant! Objects can be dummy.
 					legs_no_ = legs->size();
 					jets_no_ = jets->size();
 					// Knowing the number of jets and legs fix the selections to match it (remove 1000 dummy values)
 					fixSelections();
 					// Stuff to do at the first execution, e.g. assigning branches
-					std::cout<<"[ML]\tAdding branches for ML analysis."<<std::endl;
-					prepareVariables(legs, jets);
-					addBranch(MLTree_);
+					prepareVariables(legs, jets); // prepare bufors
+					addBranch(MLTree_);	// add branches
 					
 				}
 				if(legs->size()>0)
-					execution_counter_++;
+					execution_counter_++; /*!< count the number of calls of this function */
 
 				if(jets->size() != jets_no_ || legs->size() != legs_no_)
 					throw std::logic_error("[ERROR] MLAnalyzer REQUIRES CONSTANT NUMBER OF JETS AND LEGS IN EACH CALL!");
@@ -397,16 +466,16 @@ bool MLAnalyzer::analyze(const EventProxyBase& iEvent, ObjectMessenger *aMesseng
 				unsigned no = 0;
 				std::for_each(legs->begin(), legs->end(), [&](const HTTParticle* leg)
 				{
-					extractP4(leg->getP4(*aSystEffect), std::string("legs"), no);
+					extractP4(leg->getP4(*aSystEffect), std::string("legs"), no); // copy P4 to bufors
 					no++;
 				});
 				no = 0;
 				std::for_each(jets->begin(), jets->end(), [&](const HTTParticle* jet)
 				{
-					extractP4(jet->getP4(*aSystEffect), std::string("jets"), no);
+					extractP4(jet->getP4(*aSystEffect), std::string("jets"), no); // copy P4 to bufors
 				});
 
-				// Extract properties defined in PropertyEnum.h
+				// Extract values of properties defined in PropertyEnum.h and selected in external file
 				extractParticleProperties(legs, jets);
 				// Dealing with global parameters, one can put here another function for other analysis
 				globalsHTT(const_cast<const MLObjectMessenger*>(mess), legs, aSystEffect);
@@ -424,6 +493,7 @@ bool MLAnalyzer::analyze(const EventProxyBase& iEvent, ObjectMessenger *aMesseng
 	return true;
 }
 
+//! Dummy function
 bool MLAnalyzer::analyze(const EventProxyBase& iEvent)
 {
 	return analyze(iEvent, NULL);

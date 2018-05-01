@@ -21,9 +21,9 @@ class MLAnalyzer : public Analyzer
 {
 
  public:
-
+  //! Constructor with the name.
   MLAnalyzer(const std::string & aName, const std::string & aDecayMode);
-
+  //! Destructor
   virtual ~MLAnalyzer();
   
   ///Initialize the analyzer
@@ -35,7 +35,7 @@ class MLAnalyzer : public Analyzer
 };
   
 
-  virtual Analyzer * clone() const{ return 0;}
+  virtual inline Analyzer * clone() const{ return 0;}
   
   virtual bool analyze(const EventProxyBase& iEvent);
 
@@ -43,16 +43,17 @@ class MLAnalyzer : public Analyzer
 
   virtual void finalize(){;};
 
-  virtual void clear(){;};
+  //! Clear the member field collections.
+  virtual void clear();
 
+  //! Add branches to the TTree.
   virtual void addBranch(TTree *tree);
 
   virtual void addCutHistos(TList *aList){;};
 
-  const std::string & name() const{return myName_;};
+  inline bool filter() const{ return filterEvent_;};
 
-  bool filter() const{ return filterEvent_;};
-
+  //! Name of the config file, where properties of particles are set to be extracted from analysis.
   std::string cfgFileName;
 
  protected:
@@ -64,36 +65,36 @@ class MLAnalyzer : public Analyzer
 
  private:
 
-  std::string myName_;
-  int execution_counter_; // counts calls of analyze()
-  unsigned legs_no_;
-  unsigned jets_no_;
-  TTree *MLTree_; // stores the address of output TTree
+  int execution_counter_; /*!< Counts calls of analyze() */
+  unsigned legs_no_; /*!< Number of legs in current analysis. Has to be constant during the execution. */
+  unsigned jets_no_; /*!< Number of jets in current analysis. Has to be constant during the execution. */
+  TTree *MLTree_; /*!< Stores the address of output TTree */
 
 
   //should this Analyzer be able to filter events
   bool filterEvent_;
 
-  //containers for four-momenta
+  //! containers for four-momenta
   std::vector<double> legs_p4_;
   std::vector<double> jets_p4_;
-  // storage for params loaded from file and assignement to concrete legs and jets
-  std::map<std::string, std::vector<double>> params_; //current values of params
-  std::map<std::string, std::set<unsigned>> params_legs_; //which legs have which params
-  std::map<std::string, std::set<unsigned>> params_jets_; //which jets have which params
-  // global parameters of the analylis
-  int nJets30_;
-  float visMass_;
-  float higgsPT_;
-  float betaScore_;
-  float higgsMassTrans_;
+  //! storage for params loaded from file and assignement to concrete legs and jets
+  std::map<std::string, std::vector<double>> params_; /*!< current values of params */
+  std::map<std::string, std::set<unsigned>> params_legs_; /*!< which legs have which params */
+  std::map<std::string, std::set<unsigned>> params_jets_; /*!< which jets have which params */
 
-  void extractP4(const TLorentzVector& v, const std::string destination, const unsigned no);
-  void prepareVariables(const std::vector<const HTTParticle*>* legs, const std::vector<const HTTParticle*>* jets);
-  void globalsHTT(const MLObjectMessenger* mess, const std::vector<const HTTParticle*>* legs, const HTTAnalysis::sysEffects* aSystEffect);
-  void parseCfg(const std::string & cfgFileName);
-  void fixSelections();
-  void extractParticleProperties(const std::vector<const HTTParticle*>* legs,  const std::vector<const HTTParticle*>* jets);
+  //! global parameters of the analylis
+  int nJets30_; /*!< How many interesting jets were present in an event */
+  float visMass_; 
+  float higgsPT_;
+  float betaScore_; /*!< Beta score of B-jet */
+  float higgsMassTrans_; /*!< Transverse mass of Higgs */
+
+  void extractP4(const TLorentzVector& v, const std::string destination, const unsigned no); /*!< copy p4 of jets and legs into jets_p4_ and legs_p4_ */
+  void prepareVariables(const std::vector<const HTTParticle*>* legs, const std::vector<const HTTParticle*>* jets); /*!< Prepare vars that will be used for saving to TTree */
+  void globalsHTT(const MLObjectMessenger* mess, const std::vector<const HTTParticle*>* legs, const HTTAnalysis::sysEffects* aSystEffect); /*!< Calculate global parameters for HTTAnalysis */ 
+  void parseCfg(const std::string & cfgFileName); /*!< Parse the config file */
+  void fixSelections(); /*!< Fix the numbers of legs for extraction in case when parameters for all legs are to be extracted */
+  void extractParticleProperties(const std::vector<const HTTParticle*>* legs,  const std::vector<const HTTParticle*>* jets); /*!< Extract values of particle properties to variables in collections */
 
 
 

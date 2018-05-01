@@ -23,8 +23,8 @@ class MLObjectMessenger : public ObjectMessenger
   inline MLObjectMessenger(const std::string& aName)
   {
     std::string name = aName;
-    if(aName.substr(0,2) != "ML")
-      name = std::string("ML")+aName;
+    // if(aName.substr(0,2) != "ML")
+    //   name = std::string("ML")+aName;
     myName_ = name;
   }
 

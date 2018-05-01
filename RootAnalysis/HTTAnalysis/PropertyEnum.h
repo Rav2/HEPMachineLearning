@@ -1,3 +1,16 @@
+//! File containing an enum type of particle properties and an interface to get them using std::string names.
+/*!
+  \author Rafal Maselek && Artur Kalinowski
+  \date May 2018
+  
+  This file contains an enum type declaration, which enumerates 29 different properties of particles defined
+  by HTTParticle object type. In order to access them via parsing an external file, class PropertyEnumString
+  was added with a static member std::map -- an interface to get PropertyEnum by using std::string name of
+  property. 
+  See also PropertyEnum.cc
+*/
+
+
 #include <map>
 
 enum class PropertyEnum { PDGId = 0, 

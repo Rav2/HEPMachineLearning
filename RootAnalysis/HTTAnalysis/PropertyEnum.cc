@@ -1,3 +1,11 @@
+//! File defining an interface (just static std::map) to get PropertyEnum members by using their std::string names.
+/*!
+  \author Rafal Maselek
+  \date May 2018
+  
+  See also PropertyEnum.h
+*/
+
 #include "PropertyEnum.h"
 	
 const std::map<std::string, PropertyEnum> PropertyEnumString::enumMap={
