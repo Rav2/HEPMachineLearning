@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # \brief Script to read data from TTree inside a .root file into python lists.
 # \author Rafal Maselek
@@ -6,7 +7,7 @@
 from ROOT import TTree, TFile, TObjArray
 import matplotlib.pyplot as plt
 
-def read_tree(file_name = "~/Projekty/RootAnalysis/HTTAnalysis/RootAnalysis_AnalysisMuTau.root", tree_name = "Summary/tree"):
+def read_tree(file_name = "data/dummy.root", tree_name = "Summary/tree"):
 	"""
 	Function to read from a TTree inside a root file. Compatible with MLAnalyzer output.
 	:param file_name: Name/path of the input .root file with the TTree inside.
