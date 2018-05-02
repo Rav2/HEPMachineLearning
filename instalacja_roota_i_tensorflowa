@@ -64,4 +64,6 @@ conda create -n root_tensorflow pip python=3.6
 source activate root_tensorflow
 conda install -c anaconda pcre
 pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl
-
+conda install matplotlib
+conda install scikit-learn
+conda install -c anaconda future
