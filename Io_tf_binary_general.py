@@ -1,3 +1,11 @@
+import tensorflow as tf
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+import json
+
+
 """
 ten nowy bedzie uproszczony
 __init__(nazwa_folderu,tryb,co_ile_flush_file=10)
