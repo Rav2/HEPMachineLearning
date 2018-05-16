@@ -33,7 +33,7 @@ sudo make install
 cd /usr/local/root
 source bin/thisroot.sh
 
-nano ~/.bash_profile
+nano ~/.bashrc
 
 i tu wpisujemy w tym pliku na koncu 
 #CERN ROOT
