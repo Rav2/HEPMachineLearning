@@ -8,16 +8,17 @@ import json
 
 """
 ten nowy bedzie uproszczony
-__init__(nazwa_folderu,tryb,co_ile_flush_file=10)
+__init__(nazwa_folderu,tryb)
     inputs:
-            nazwa_folderu np "pierwszy_dataset" tam bedzie pisac/stamtad bedzie sczytywac. 
-            tryb np 'r' lub 'w' i oznacza czy czytac chcesz czy pisac
-            co_ile_flush_file to znaczy jak czesto ma oprozniac swoj buffer, liczy sie tylko
-                    gdy tryb=='w', nie wiem ile ma wynosic,wiec jak wiesz to smialo ustaw
+            tryb: np 'r' lub 'w' i oznacza czy czytac ('r') czy pisac ('w')
+            nazwa_folderu: np "pierwszy_dataset" tam bedzie pisac/stamtad bedzie szczytywac. 
+                wydaje mi sie, ze musi byc to nazwa bez spacji oraz moze byc na przyklad "folder/subfolder"
+            
+           
 
-write(legs,jets,global_params,properties,l)
+write(legs,jets,global_params,properties,l,co_ile_flush_file=10)
         dostepna tylko jak tryb to jest 'w'
-            legs,jets,global_params,properties jak w wyjsciu klasy read_tree, tylko "dla jednego przypadku"
+            legs,jets,global_params,properties: jak w wyjsciu klasy read_tree, tylko "dla jednego przypadku"
                 wiec jest tak
                         zakladam, ze legs to jest lista o shapie (?,4) wypelniona floatami
                         jets dokladnie tak samo
@@ -25,16 +26,17 @@ write(legs,jets,global_params,properties,l)
                         properties tak samo
                         l to label jest intem rownym to 0 lub 1, gdzie 1 oznacza, ze to jest raczej bardziej ciekawy przypadek
                          a 0 to taki bardziej tlo. to jest int 
+                 co_ile_flush_file: to znaczy jak czesto ma oprozniac swoj buffer, liczy sie tylko
+                    gdy tryb=='w', nie wiem ile ma wynosic,wiec jak wiesz to smialo ustaw
 
 close()
             dostepna tylko dla tryb=='w'
-            zamyka bezpiecznie nasz plik
+            zamyka bezpiecznie nasz plik, tak by mozna go bylo uzyc przy czytaniu
 read()
             dostepna tylko dla tryb=='r'
             wyrzuci z siebie tensorflowowy dataset gotowy do uczenia
-                w przyszlosci read moze przeprowadzac dodawanie nowych featcherkow,ale na razie
-                tego nie robi. W sumie jak mamy dataset to mozemy tez te featcherki nowe dorobic poxniej.
-                zobaczymy jak to bedzie.
+                w przyszlosci Teraz dorabiam to, ze bedzie z siebire wyrzucac wraz z 
+                nowymi dorobionymi featcherami
             dataset wyglada tak, ze pojedynczy przypadek to jest (slownik_featurow,label)
                 gdzie label to bedzie 0 lub 1
                 zas slownik featerow to jest tak, ze sa klucze stringow a wartosci to jest
@@ -42,14 +44,51 @@ read()
                 to znaczy, ze zwraca to samo co ta stara moja klasa czytajaca
 types()
             uzywamy takiego czegos tylko dla type=='r'
-            zwraca slownik typow naszego datasetu
+            zwraca slownik typow naszego datasetu. to znaczy, ze zwraca slownik
+            {'nazwa_featchera':(4,'f')} jesli featcher o tej nazwie to lista 4 floatow
             
 write_old(features,l) 
-        features to slwonik features dla jednego przykladu
+        features to slwonik features dla jednego przykladu np {"momentum":[1.,0.,5.,7.]}
         moze liczbe lub liste lub np array typu jakiegos int lub jakiegos float
         l to jest label jego 0 lub 1
         to jest dostepne tylko w przypadku trybu 'w'
+        wygodna metoda do tego, azeby "potasowac" przyklady z roznych plikow w jeden dataset, bo pisze
+        sie przyklady w takiej formie w jakiej sie odczytywalo z tych datasetow. 
+
+engineer_feature(self,f,slownik,typ,nazwa):
+        dostepna tylko w trybie 'w' czyli czytania
+    metoda ta sprawia, ze jak zrobisz .read() to dostaniesz dataset ktory ma taki fajny
+        nowy feature. Metoda ta zmienia wynik zadzialania metody .types(), mozna
+        z powodzeniem uzywac wczesniej zrobionych features do produkcji jeszcze nowszych.
+        nazwa: czyli jak ten nowy ma sie nazywac
         
+        f: to funkcja przyjmująca argumenty o nazwach ze zbioru kluczy slownika slownik, 
+                zwraca zas nowy feature (czyli tensor o ksztalcie (-1,). musi to byc funkcja
+                dzialajaca dobrze na tensorach z tensorflow. To jest tak fajnie zaklepane, ze
+                wyrzuci blad jesli funkcja jest niepoprawna od razu przy wywolaniu tej 
+                engineer_feature.
+                 funkcja f musi byc taka, ze dobrze dziala na tensorflowywch
+                 tensorach o ksztalcie (-1,) to znaczy 
+                scisle jednowymiarowych. Wynikiem tej funkcji czyli nowym featurem 
+                musi byc znowu tensor o ksztalcie
+                (-1,). 
+        
+        
+                https://www.tensorflow.org/api_guides/python/math_ops
+                tu macie podstawowe operacje. pamietjcie, ze * oraz + tez mozna uzywac, ale
+                nie wszystkie funkcje z numpy sa dobre w tensorflow( to znaczy inaczej sie w nim nazywaja).
+        
+        slownik:  to slownik którego klucze sa ze zbioru nazw argumentow funkcji f zas 
+            zas wartosci to sa nazwy rzeczy wystepujacych w kluczach slownika z metody .types()
+            i to mowi jakie nalezy rzeczy z dataset wstawic do funkcji f azeby otrzymac nowy feature
+        typ: wynosi np (4,'f') cyzli ze ten nowy
+            feature bedzie mial 4 floaty. moze byc tez 'i'. oznacza, 
+            czy to co powstaje bedzie intem czy floatem. 
+            Tak wiem to leniwe, ale bardziej bugoodporne po mojej stronie. 
+            
+        
+            
+       
             
 
 
@@ -62,12 +101,26 @@ write_old(features,l)
 
 
 class Io_tf_binary_general:
-    def __init__(self,nazwa_folderu,tryb,co_ile_flush_file=10):
+    def __init__(self,nazwa_folderu,tryb):
         
         self.nazwa_folderu=nazwa_folderu
         self.tryb=tryb
-        self.co_ile=co_ile_flush_file
+        
+        if tryb=='r':
+            slownik_typow=Io_tf_binary_general.wczytaj_json(self.nazwa_folderu+"/metadata")
+            self.wewnetrzny=Io_tf_binary_general.Io_tf_binary_stary(
+                self.nazwa_folderu+"/dane",slownik_typow,self.tryb)
+        
         self.nowopowstala=True
+        
+    def engineer_feature(self,f,slownik,typ,nazwa):
+        assert self.tryb=='r'
+        assert not (nazwa in self.wewnetrzny.types().keys())
+        self.wewnetrzny.engineer_feature(f,slownik,typ,nazwa)
+        
+        
+    
+        
         
     
     def zapisz_json(co,gdzie):
@@ -137,7 +190,7 @@ class Io_tf_binary_general:
             f[k]=[properties[k]]
         return f,l
     
-    def write(self,legs,jets,global_params,properties,l):
+    def write(self,legs,jets,global_params,properties,l,co_ile_flush_file=10):
         #zakladam, ze legs to jest lista o shapie (?,4) wypelniona floatami
         #jets dokladnie tak samo
         #global_params to jest w postaci {nazwa:liczba, ...}
@@ -150,7 +203,7 @@ class Io_tf_binary_general:
             self.typy_pierwszego=slownik
             Io_tf_binary_general.zapisz_json(slownik,self.nazwa_folderu+"/metadata")
             self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
-                self.nazwa_folderu+"/dane",slownik,self.tryb,self.co_ile)
+                self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
         f,l=Io_tf_binary_general.zrob_sensowna_forme(legs,jets,global_params,properties,l)
         slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(f)
         assert self.typy_pierwszego==slownik
@@ -158,7 +211,7 @@ class Io_tf_binary_general:
         
         self.stary_io.wpisz(f,l)
         
-    def write_old(self,features,l):
+    def write_old(self,features,l,co_ile_flush_file=10):
         assert self.tryb=='w'
         if self.nowopowstala==True:
             os.system("mkdir "+self.nazwa_folderu)
@@ -167,7 +220,7 @@ class Io_tf_binary_general:
             self.typy_pierwszego=slownik
             Io_tf_binary_general.zapisz_json(slownik,self.nazwa_folderu+"/metadata")
             self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
-                self.nazwa_folderu+"/dane",slownik,self.tryb,self.co_ile)
+                self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
         slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(features)
         assert self.typy_pierwszego==slownik
         
@@ -185,15 +238,15 @@ class Io_tf_binary_general:
             self.stary_io.close()
     def read(self):
         assert self.tryb=='r'
-        slownik=Io_tf_binary_general.wczytaj_json(self.nazwa_folderu+"/metadata")
-        stary_io=Io_tf_binary_general.Io_tf_binary_stary(
-                self.nazwa_folderu+"/dane",slownik,self.tryb,self.co_ile)
-        return stary_io.wczytaj_dataset()
+        
+        return self.wewnetrzny.wczytaj_dataset()
     def types(self):
         if self.tryb=='r':
-            return Io_tf_binary_general.wczytaj_json(self.nazwa_folderu+"/metadata")
+            return self.wewnetrzny.types()
         if self.nowopowstala==False:
             return self.self.typy_pierwszego
+        print ("jeszcze nic wpisales, wiec nie wiadomo")
+        return {}
         
     
     #jakby ktos kopiowal to to idzie dalej
@@ -217,6 +270,7 @@ class Io_tf_binary_general:
     class Io_tf_binary_stary:
         def __init__(self,nazwa_pliku,slownik,tryb,co_ile_flush_file=10):
             #tryb to 'w' dla write oraz 'r' dla read
+            
             self.co_ile=co_ile_flush_file
             self.plik=nazwa_pliku
             self.typy=slownik
@@ -224,11 +278,16 @@ class Io_tf_binary_general:
                 assert self.typy[k][1] in ['f','i']
                 assert self.typy[k][0]>0 
                 assert np.issubdtype(type(self.typy[k][0]), np.integer)
+            self.tryb=tryb
             if tryb=='w':
                 self.writer= tf.python_io.TFRecordWriter(self.plik)
+            if tryb=='r':
+                self.dataset=self.wczytaj_bez_feature_engeeneringu()
             self.liczba_wrzuconych=0
 
             #self.cos=Io_tf_binary.wrap_int64([5])
+        def types(self):
+            return self.typy
 
         def close(self):
             self.writer.close()
@@ -316,12 +375,7 @@ class Io_tf_binary_general:
 
 
 
-
-
-
-
-
-        def wczytaj_dataset(self):
+        def wczytaj_bez_feature_engeeneringu(self):
 
             def zeslownikoj(x):
                 keys=list(x.keys())
@@ -367,6 +421,35 @@ class Io_tf_binary_general:
             dataset = tf.data.TFRecordDataset(self.plik)
             dataset = dataset.map(parse)
             return dataset
+
+
+        def engineer_feature(self,f,slownik,typ,nazwa):
+            assert self.tryb=='r'
+            """ to ma zmienic po prostu nasz self.dataset"""
+            def dodaj_jeden_feature(engineered,dataset):
+                """ten engineered to jest ten slownik {'f':f,'slownik':slownik,'typ':typ,'nazwa':nazwa}"""
+                for k in engineered['slownik'].keys():
+                    assert engineered['slownik'][k] in self.typy.keys()
+                assert not (engineered['nazwa'] in self.typy.keys())
+                def lambdowata(f,label):
+                    #features,label=jeden_przyklad
+                    features=f.copy()
+                    def zrob_podstawienie():
+                        podstawienie={}
+                        for zmienna in engineered['slownik'].keys():
+                            podstawienie[zmienna]=features[engineered['slownik'][zmienna]]
+                        return podstawienie
+                    nazwa=engineered['nazwa']
+                    features[nazwa]=engineered['f'](**zrob_podstawienie())
+                    self.typy[nazwa]=engineered['typ']
+                    return features,label
+                return dataset.map(lambdowata)
+                    
+            engi={'f':f,'slownik':slownik,'typ':typ,'nazwa':nazwa}
+            self.dataset= dodaj_jeden_feature(engi,self.dataset)
+        def wczytaj_dataset(self):
+            assert self.tryb=='r'
+            return self.dataset
     
     
     

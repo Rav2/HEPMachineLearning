@@ -1,11 +1,15 @@
 
 
+
+
+    
+
 """
 
-Podajemy slownik na takich samych zasadach co podawalismy do tamtego Io_tf_binary
-Tym razem jak podajemy sciezke do pliku to ten plik ma juz byc pelen danych. 
 
-bardzo nie lubi jak mu sie przerywa trening przy pomocy kernel interrrup
+Tym razem jak podajemy sciezke do folderu to ten plik ma juz byc pelen danych. 
+
+bardzo nie lubi jak mu sie przerywa trening przy pomocy kernel interrrupt
 pozniej nie chodza rozne rzeczy w takim przerwanym obiekcie
 bo jak zaczyna trening to finalizuje graph co kolwiek to znacyzy, i 
 jak konczy to chyba go odfinalizowywuje, ale jak przerwiemy to tego nie zrobi. nie do 
@@ -22,7 +26,8 @@ __init__(nazwa_folderu,hidden_units,model_dir)
         danych wejsciowych ani wyjsciowych. idziemy od pierwszej (najblizszej inputu) do ostatniej
         model_dir to tam bedzie pisac swoje rzeczy nasz model
 train 
-        jest self explainatory. wydaje mi sie, ze to robi tak, ze kontynuuje trenowanie z miejsca w ktorym skonczylo
+        jest self explainatory. wydaje mi sie, ze to robi tak, ze kontynuuje
+        trenowanie z miejsca w ktorym skonczylo
 evaluate 
         to jest zwykla ewaluacja. tyle, ze mozna podac jako argument "folder" z ktorego pochodza nasze dane.
         ale ta funkcja zawsze dziala tak, ze po prostu traktuje 1 jako prawdziwe przypadki a 
@@ -32,10 +37,14 @@ evaluate_jak_z_pracy(self,p0to1,p1to1,ile_take=10000,folder="")
         jako folder te nasze przypadki. ile_take to znaczy jak wiele przypadkow z tego datasetu
          z argumentu 'folder' nalezy wziasc. p0to1 to jest prawdopodoienstwo, ze przypadek oznaczony 
          0 jest tak na prawde 1 zas p1to1 to jest ze oznaczony jako 1 jest tak naprawde wlasnie rozpadem 
-         czyli 1. zwraca jako pierwsze auc a potem jeszcze 3 listy zwiazane z rysowaniem krzywej roc.
+         czyli 1.zwraca jako pierwsze auc a potem jeszcze 3 listy zwiazane z rysowaniem krzywej roc.
          to znaczy liste jej xsow, jej ygrekow oraz jakim tresholdom te punkty krzywej roc odpowiadaja.
-typy
+types()
         to jest zmienna tego obiektu ktora ma informacje o tym jakie feateres sa w naszym datasecie
+        po tym jak zrobisz feature engineering to sie zmieni wynik podzialania .types()
+engineer_feature(self,f,slownik,typ,nazwa)
+        dokladnie jak w tamtym dla io_tf_binary_general
+        
 
 
 
@@ -51,23 +60,26 @@ import Io_tf_binary_general as io
 
 class Dnn_uniwersalny:
     def __init__(self,nazwa_folderu,hidden_units,model_dir):
-        self.model_dit=model_dir
+        self.not_compiled=True
+        self.model_dir=model_dir
         self.nazwa_folderu=nazwa_folderu
         self.hidden_units=hidden_units
         self.wczytywacz=io.Io_tf_binary_general(nazwa_folderu,'r')
-        self.typy=self.wczytywacz.types()
+        
+    def make_model(self):
+        assert self.not_compiled
         my_feature_columns = []
-        for k in self.typy.keys():
-            if self.typy[k][1]=='f':
+        for k in self.wczytywacz.types().keys():
+            if self.wczytywacz.types()[k][1]=='f':
                 t=tf.float32
             else:
                 t=tf.int32
             my_feature_columns.append(tf.feature_column.numeric_column(key=k,shape=\
-                        (self.typy[k][0],),dtype=t ))
+                        (self.wczytywacz.types()[k][0],),dtype=t ))
         
         self.feature_columns=my_feature_columns
         
-        def input_fn( batch_size=100,buffer_size=1000,folder=nazwa_folderu,one_epoch=False,czy_shuffle=True
+        def input_fn( batch_size=100,buffer_size=1000,folder=self.nazwa_folderu,one_epoch=False,czy_shuffle=True
                     ,czy_batch=True,take=False,ile_take=10000):
             """input function for training
             nazwy to lista nazw feature w kolejnosci wystepowania
@@ -89,8 +101,14 @@ class Dnn_uniwersalny:
         self.classifier = tf.estimator.DNNClassifier(
         feature_columns=self.feature_columns,
         hidden_units=self.hidden_units,
-        model_dir=model_dir,
+        model_dir=self.model_dir,
         n_classes=2)
+        self.not_compiled=False
+    def types():
+        return self.wczytywacz.types()
+    def engineer_feature(self,f,slownik,typ,nazwa):
+        assert self.not_compiled
+        return self.wczytywacz.engineer_feature(f,slownik,typ,nazwa)
     def train(self,batch_size=128,buffer_size=1000,steps=3000):
         self.classifier.train(
         input_fn=lambda:self.input_fn( batch_size,buffer_size),
@@ -120,7 +138,7 @@ class Dnn_uniwersalny:
             return dataset
             """
     def _labelki( folder,ile_take):
-        
+        """pomocnicza funkcja ktora zwraca generator labelkow przypadkow"""
         #g = tf.Graph()
         #with g.as_default():
         dataset=io.Io_tf_binary_general(folder,'r').read().take(ile_take)
@@ -192,6 +210,12 @@ class Dnn_uniwersalny:
     
     
     
+    
+        
+        
+        
+    
+        
     
         
         
