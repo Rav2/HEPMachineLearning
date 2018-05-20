@@ -1,9 +1,5 @@
 
 
-
-
-    
-
 """
 
 
@@ -25,6 +21,15 @@ __init__(nazwa_folderu,hidden_units,model_dir)
         hidden_units to jest lista po ile ma byc ukrytych unitsow. czyli nie podajemy rozmiaru
         danych wejsciowych ani wyjsciowych. idziemy od pierwszej (najblizszej inputu) do ostatniej
         model_dir to tam bedzie pisac swoje rzeczy nasz model
+engineer_feature(self,f,slownik,typ,nazwa)
+        dokladnie jak w tamtym dla io_tf_binary_general
+make_model(self,cathegorical_vocabulary_lists):
+        to tworzy nasz model po tym jak podawalismy transformacje dla danych zgodnie z 
+        engineer_feature() (taka jest metoda)
+        tutaj cathegorical_vocabulary_lists to jest slownik typu
+        {'jakies_id':[1,2,3]} to znaczy, ze takie cos moze miec takie wartosci. w kluczach
+        sa tylko kategoryczne argumenty. Wazne, ze to maja byc integery a nie na przyklad
+        floaty czy inne takie. stringow tez nie obsluguję. 
 train 
         jest self explainatory. wydaje mi sie, ze to robi tak, ze kontynuuje
         trenowanie z miejsca w ktorym skonczylo
@@ -42,8 +47,7 @@ evaluate_jak_z_pracy(self,p0to1,p1to1,ile_take=10000,folder="")
 types()
         to jest zmienna tego obiektu ktora ma informacje o tym jakie feateres sa w naszym datasecie
         po tym jak zrobisz feature engineering to sie zmieni wynik podzialania .types()
-engineer_feature(self,f,slownik,typ,nazwa)
-        dokladnie jak w tamtym dla io_tf_binary_general
+
         
 
 
@@ -66,25 +70,42 @@ class Dnn_uniwersalny:
         self.hidden_units=hidden_units
         self.wczytywacz=io.Io_tf_binary_general(nazwa_folderu,'r')
         
-    def make_model(self):
+    def make_model(self,cathegorical_vocabulary_lists):
         assert self.not_compiled
         my_feature_columns = []
         for k in self.wczytywacz.types().keys():
-            if self.wczytywacz.types()[k][1]=='f':
-                t=tf.float32
+            if not( k in cathegorical_vocabulary_lists.keys()):
+                if self.wczytywacz.types()[k][1]=='f':
+                    t=tf.float32
+                else:
+                    t=tf.int32
+                my_feature_columns.append(tf.feature_column.numeric_column(key=k,shape=\
+                            (self.wczytywacz.types()[k][0],),dtype=t ))
             else:
-                t=tf.int32
-            my_feature_columns.append(tf.feature_column.numeric_column(key=k,shape=\
-                        (self.wczytywacz.types()[k][0],),dtype=t ))
-        
+                assert self.wczytywacz.types()[k][1]=='i'
+                my_feature_columns.append(
+                    
+                    tf.feature_column.embedding_column(
+                    
+    tf.feature_column.categorical_column_with_vocabulary_list(
+    key=k,vocabulary_list=cathegorical_vocabulary_lists[k],
+    ),len(cathegorical_vocabulary_lists[k])))
         self.feature_columns=my_feature_columns
         
         def input_fn( batch_size=100,buffer_size=1000,folder=self.nazwa_folderu,one_epoch=False,czy_shuffle=True
-                    ,czy_batch=True,take=False,ile_take=10000):
+                    ,czy_batch=True,take=False,ile_take=10000,kategoryczne=cathegorical_vocabulary_lists.keys()):
             """input function for training
             nazwy to lista nazw feature w kolejnosci wystepowania
             if one_epoch to tylko jedna epoka"""
             dataset=io.Io_tf_binary_general(folder,'r').read()
+            def fun(f,l):
+                wyrzut=f.copy()
+                for k in kategoryczne:
+                    wyrzut[k]=tf.reshape(f[k],shape=[])
+                return wyrzut,l
+                
+            
+            dataset=dataset.map(fun)
             if take:
                 dataset=dataset.take(ile_take)
             if czy_shuffle:
@@ -95,6 +116,7 @@ class Dnn_uniwersalny:
                 dataset=dataset.repeat()
             if czy_batch:
                 dataset=dataset.batch(batch_size)
+
             return dataset
         self.input_fn=input_fn
         
@@ -210,12 +232,6 @@ class Dnn_uniwersalny:
     
     
     
-    
-        
-        
-        
-    
-        
     
         
         
