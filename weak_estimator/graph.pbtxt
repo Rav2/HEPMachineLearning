@@ -712,6 +712,14 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
         }
         shape {
           dim {
@@ -733,6 +741,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
         type: DT_FLOAT
@@ -944,7 +953,7 @@ node {
     key: "f"
     value {
       func {
-        name: "tf_map_func_vO8Adaps6oA"
+        name: "tf_map_func_OLe0OHQz7eU"
       }
     }
   }
@@ -952,6 +961,89 @@ node {
     key: "output_shapes"
     value {
       list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "output_types"
+    value {
+      list {
+        type: DT_FLOAT
+        type: DT_FLOAT
+        type: DT_INT64
+        type: DT_FLOAT
+        type: DT_INT64
+      }
+    }
+  }
+}
+node {
+  name: "MapDataset_2"
+  op: "MapDataset"
+  input: "MapDataset_1"
+  attr {
+    key: "Targuments"
+    value {
+      list {
+      }
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@Iterator"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "f"
+    value {
+      func {
+        name: "tf_map_func_4HFMlc06dAI"
+      }
+    }
+  }
+  attr {
+    key: "output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
         shape {
           dim {
             size: 1
@@ -974,6 +1066,7 @@ node {
     value {
       list {
         type: DT_FLOAT
+        type: DT_FLOAT
         type: DT_INT64
         type: DT_FLOAT
         type: DT_INT64
@@ -984,7 +1077,7 @@ node {
 node {
   name: "ShuffleDataset"
   op: "ShuffleDataset"
-  input: "MapDataset_1"
+  input: "MapDataset_2"
   input: "buffer_size"
   input: "seed"
   input: "seed2"
@@ -1015,6 +1108,11 @@ node {
           }
         }
         shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
         }
         shape {
           dim {
@@ -1030,6 +1128,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
         type: DT_FLOAT
@@ -1076,6 +1175,11 @@ node {
           }
         }
         shape {
+          dim {
+            size: 1
+          }
+        }
+        shape {
         }
         shape {
           dim {
@@ -1091,6 +1195,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
         type: DT_FLOAT
@@ -1137,6 +1242,14 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
         }
         shape {
           dim {
@@ -1158,6 +1271,7 @@ node {
     key: "output_types"
     value {
       list {
+        type: DT_FLOAT
         type: DT_FLOAT
         type: DT_INT64
         type: DT_FLOAT
@@ -1214,6 +1328,14 @@ node {
           dim {
             size: -1
           }
+          dim {
+            size: 1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
         }
         shape {
           dim {
@@ -1235,6 +1357,14 @@ node {
     key: "output_shapes"
     value {
       list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 1
+          }
+        }
         shape {
           dim {
             size: -1
@@ -1269,6 +1399,7 @@ node {
     value {
       list {
         type: DT_FLOAT
+        type: DT_FLOAT
         type: DT_INT64
         type: DT_FLOAT
         type: DT_INT64
@@ -1277,9 +1408,304 @@ node {
   }
 }
 node {
-  name: "dnn/input_from_feature_columns/input_layer/inna_wlasnosc/Shape"
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/Shape"
   op: "Shape"
   input: "IteratorGetNext"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice/stack"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 0
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice/stack_1"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice/stack_2"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+          dim {
+            size: 1
+          }
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice"
+  op: "StridedSlice"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/Shape"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice/stack"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice/stack_1"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice/stack_2"
+  attr {
+    key: "Index"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape/shape/1"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+        }
+        int_val: 1
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape/shape"
+  op: "Pack"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/strided_slice"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape/shape/1"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape"
+  op: "Reshape"
+  input: "IteratorGetNext"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape/shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "dnn/input_from_feature_columns/input_layer/inna_wlasnosc/Shape"
+  op: "Shape"
+  input: "IteratorGetNext:1"
   attr {
     key: "T"
     value {
@@ -1541,7 +1967,7 @@ node {
 node {
   name: "dnn/input_from_feature_columns/input_layer/inna_wlasnosc/Reshape"
   op: "Reshape"
-  input: "IteratorGetNext"
+  input: "IteratorGetNext:1"
   input: "dnn/input_from_feature_columns/input_layer/inna_wlasnosc/Reshape/shape"
   attr {
     key: "T"
@@ -1604,7 +2030,7 @@ node {
 node {
   name: "dnn/input_from_feature_columns/input_layer/kategoryczna_embedding/ExpandDims"
   op: "ExpandDims"
-  input: "IteratorGetNext:1"
+  input: "IteratorGetNext:2"
   input: "dnn/input_from_feature_columns/input_layer/kategoryczna_embedding/ExpandDims/dim"
   attr {
     key: "T"
@@ -4680,7 +5106,7 @@ node {
 node {
   name: "dnn/input_from_feature_columns/input_layer/pierwsza/Shape"
   op: "Shape"
-  input: "IteratorGetNext:2"
+  input: "IteratorGetNext:3"
   attr {
     key: "T"
     value {
@@ -4942,7 +5368,7 @@ node {
 node {
   name: "dnn/input_from_feature_columns/input_layer/pierwsza/Reshape"
   op: "Reshape"
-  input: "IteratorGetNext:2"
+  input: "IteratorGetNext:3"
   input: "dnn/input_from_feature_columns/input_layer/pierwsza/Reshape/shape"
   attr {
     key: "T"
@@ -5005,6 +5431,7 @@ node {
 node {
   name: "dnn/input_from_feature_columns/input_layer/concat"
   op: "ConcatV2"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape"
   input: "dnn/input_from_feature_columns/input_layer/inna_wlasnosc/Reshape"
   input: "dnn/input_from_feature_columns/input_layer/kategoryczna_embedding/Reshape"
   input: "dnn/input_from_feature_columns/input_layer/pierwsza/Reshape"
@@ -5012,7 +5439,7 @@ node {
   attr {
     key: "N"
     value {
-      i: 3
+      i: 4
     }
   }
   attr {
@@ -5036,7 +5463,7 @@ node {
             size: -1
           }
           dim {
-            size: 5
+            size: 6
           }
         }
       }
@@ -5082,7 +5509,7 @@ node {
             size: 2
           }
         }
-        tensor_content: "\005\000\000\000\n\000\000\000"
+        tensor_content: "\006\000\000\000\n\000\000\000"
       }
     }
   }
@@ -5120,7 +5547,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
         }
-        float_val: -0.6324555277824402
+        float_val: -0.6123724579811096
       }
     }
   }
@@ -5158,7 +5585,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
         }
-        float_val: 0.6324555277824402
+        float_val: 0.6123724579811096
       }
     }
   }
@@ -5187,7 +5614,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -5269,7 +5696,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -5304,7 +5731,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -5331,7 +5758,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -5357,7 +5784,7 @@ node {
     value {
       shape {
         dim {
-          size: 5
+          size: 6
         }
         dim {
           size: 10
@@ -5397,7 +5824,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -5443,7 +5870,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -5640,7 +6067,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -7426,7 +7853,7 @@ node {
 node {
   name: "dnn/head/labels/ExpandDims"
   op: "ExpandDims"
-  input: "IteratorGetNext:3"
+  input: "IteratorGetNext:4"
   input: "dnn/head/labels/ExpandDims/dim"
   attr {
     key: "T"
@@ -12447,7 +12874,7 @@ node {
             size: -1
           }
           dim {
-            size: 5
+            size: 6
           }
         }
       }
@@ -12483,7 +12910,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -12539,7 +12966,7 @@ node {
             size: -1
           }
           dim {
-            size: 5
+            size: 6
           }
         }
       }
@@ -12571,7 +12998,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -12635,7 +13062,7 @@ node {
 node {
   name: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Shape"
   op: "Shape"
-  input: "dnn/input_from_feature_columns/input_layer/inna_wlasnosc/Reshape"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape"
   attr {
     key: "T"
     value {
@@ -12664,13 +13091,14 @@ node {
 node {
   name: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/ShapeN"
   op: "ShapeN"
+  input: "dnn/input_from_feature_columns/input_layer/dorobiony/Reshape"
   input: "dnn/input_from_feature_columns/input_layer/inna_wlasnosc/Reshape"
   input: "dnn/input_from_feature_columns/input_layer/kategoryczna_embedding/Reshape"
   input: "dnn/input_from_feature_columns/input_layer/pierwsza/Reshape"
   attr {
     key: "N"
     value {
-      i: 3
+      i: 4
     }
   }
   attr {
@@ -12683,6 +13111,11 @@ node {
     key: "_output_shapes"
     value {
       list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
         shape {
           dim {
             size: 2
@@ -12715,16 +13148,22 @@ node {
   input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/ShapeN"
   input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/ShapeN:1"
   input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/ShapeN:2"
+  input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/ShapeN:3"
   attr {
     key: "N"
     value {
-      i: 3
+      i: 4
     }
   }
   attr {
     key: "_output_shapes"
     value {
       list {
+        shape {
+          dim {
+            size: 2
+          }
+        }
         shape {
           dim {
             size: 2
@@ -12847,11 +13286,46 @@ node {
   }
 }
 node {
+  name: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice_3"
+  op: "Slice"
+  input: "dnn/head/gradients/dnn/hiddenlayer_0/MatMul_grad/tuple/control_dependency"
+  input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/ConcatOffset:3"
+  input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/ShapeN:3"
+  attr {
+    key: "Index"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
   name: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/tuple/group_deps"
   op: "NoOp"
   input: "^dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice"
   input: "^dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice_1"
   input: "^dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice_2"
+  input: "^dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice_3"
 }
 node {
   name: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/tuple/control_dependency"
@@ -12916,7 +13390,7 @@ node {
             size: -1
           }
           dim {
-            size: 3
+            size: 1
           }
         }
       }
@@ -12939,6 +13413,41 @@ node {
     value {
       list {
         s: "loc:@dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice_2"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 3
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/tuple/control_dependency_3"
+  op: "Identity"
+  input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice_3"
+  input: "^dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/Slice_3"
       }
     }
   }
@@ -12990,7 +13499,7 @@ node {
 node {
   name: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/kategoryczna_embedding/Reshape_grad/Reshape"
   op: "Reshape"
-  input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/tuple/control_dependency_1"
+  input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/concat_grad/tuple/control_dependency_2"
   input: "dnn/head/gradients/dnn/input_from_feature_columns/input_layer/kategoryczna_embedding/Reshape_grad/Shape"
   attr {
     key: "T"
@@ -14144,7 +14653,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -14166,7 +14675,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -14194,7 +14703,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -14220,7 +14729,7 @@ node {
     value {
       shape {
         dim {
-          size: 5
+          size: 6
         }
         dim {
           size: 10
@@ -14260,7 +14769,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -14306,7 +14815,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -15280,7 +15789,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -18977,7 +19486,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_ca349a3e2c0b4b308e7ae8479ab6df5d/part"
+        string_val: "_temp_c366d92e167841f18fd1a54c36d1bda7/part"
       }
     }
   }
@@ -19168,8 +19677,8 @@ node {
         }
         string_val: "10 0,10"
         string_val: "10 0,10"
-        string_val: "5 10 0,5:0,10"
-        string_val: "5 10 0,5:0,10"
+        string_val: "6 10 0,6:0,10"
+        string_val: "6 10 0,6:0,10"
         string_val: "3 3 0,3:0,3"
         string_val: "3 3 0,3:0,3"
         string_val: "1 0,1"
@@ -19402,8 +19911,8 @@ node {
         }
         string_val: "10 0,10"
         string_val: "10 0,10"
-        string_val: "5 10 0,5:0,10"
-        string_val: "5 10 0,5:0,10"
+        string_val: "6 10 0,6:0,10"
+        string_val: "6 10 0,6:0,10"
         string_val: "3 3 0,3:0,3"
         string_val: "3 3 0,3:0,3"
         string_val: "1 0,1"
@@ -19438,7 +19947,7 @@ node {
         }
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -19446,7 +19955,7 @@ node {
         }
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -19632,7 +20141,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -19679,7 +20188,7 @@ node {
       list {
         shape {
           dim {
-            size: 5
+            size: 6
           }
           dim {
             size: 10
@@ -20109,21 +20618,25 @@ library {
   }
   function {
     signature {
-      name: "tf_map_func_vO8Adaps6oA"
+      name: "tf_map_func_4HFMlc06dAI"
       input_arg {
         name: "arg0_0"
         type: DT_FLOAT
       }
       input_arg {
-        name: "arg1"
-        type: DT_INT64
-      }
-      input_arg {
-        name: "arg2_0"
+        name: "arg1_0"
         type: DT_FLOAT
       }
       input_arg {
+        name: "arg2"
+        type: DT_INT64
+      }
+      input_arg {
         name: "arg3_0"
+        type: DT_FLOAT
+      }
+      input_arg {
+        name: "arg4_0"
         type: DT_INT64
       }
       output_arg {
@@ -20131,15 +20644,19 @@ library {
         type: DT_FLOAT
       }
       output_arg {
+        name: "arg1"
+        type: DT_FLOAT
+      }
+      output_arg {
         name: "reshape"
         type: DT_INT64
       }
       output_arg {
-        name: "arg2"
+        name: "arg3"
         type: DT_FLOAT
       }
       output_arg {
-        name: "arg3"
+        name: "arg4"
         type: DT_INT64
       }
       description: "A wrapper for Defun that facilitates shape inference."
@@ -20169,7 +20686,7 @@ library {
     node_def {
       name: "Reshape"
       op: "Reshape"
-      input: "arg1"
+      input: "arg2"
       input: "Reshape/shape:output:0"
       attr {
         key: "T"
@@ -20189,12 +20706,16 @@ library {
       value: "arg0_0"
     }
     ret {
-      key: "arg2"
-      value: "arg2_0"
+      key: "arg1"
+      value: "arg1_0"
     }
     ret {
       key: "arg3"
       value: "arg3_0"
+    }
+    ret {
+      key: "arg4"
+      value: "arg4_0"
     }
     ret {
       key: "reshape"
@@ -20404,6 +20925,101 @@ library {
     ret {
       key: "parsesingleexample_parsesingleexample_2"
       value: "ParseSingleExample/ParseSingleExample:dense_values:2"
+    }
+  }
+  function {
+    signature {
+      name: "tf_map_func_OLe0OHQz7eU"
+      input_arg {
+        name: "arg0_0"
+        type: DT_FLOAT
+      }
+      input_arg {
+        name: "arg1_0"
+        type: DT_INT64
+      }
+      input_arg {
+        name: "arg2_0"
+        type: DT_FLOAT
+      }
+      input_arg {
+        name: "arg3_0"
+        type: DT_INT64
+      }
+      output_arg {
+        name: "mul"
+        type: DT_FLOAT
+      }
+      output_arg {
+        name: "arg0"
+        type: DT_FLOAT
+      }
+      output_arg {
+        name: "arg1"
+        type: DT_INT64
+      }
+      output_arg {
+        name: "arg2"
+        type: DT_FLOAT
+      }
+      output_arg {
+        name: "arg3"
+        type: DT_INT64
+      }
+      description: "A wrapper for Defun that facilitates shape inference."
+    }
+    node_def {
+      name: "mul/x"
+      op: "Const"
+      attr {
+        key: "dtype"
+        value {
+          type: DT_FLOAT
+        }
+      }
+      attr {
+        key: "value"
+        value {
+          tensor {
+            dtype: DT_FLOAT
+            tensor_shape {
+            }
+            float_val: 5.0
+          }
+        }
+      }
+    }
+    node_def {
+      name: "mul_0"
+      op: "Mul"
+      input: "mul/x:output:0"
+      input: "arg2_0"
+      attr {
+        key: "T"
+        value {
+          type: DT_FLOAT
+        }
+      }
+    }
+    ret {
+      key: "arg0"
+      value: "arg0_0"
+    }
+    ret {
+      key: "arg1"
+      value: "arg1_0"
+    }
+    ret {
+      key: "arg2"
+      value: "arg2_0"
+    }
+    ret {
+      key: "arg3"
+      value: "arg3_0"
+    }
+    ret {
+      key: "mul"
+      value: "mul_0:z:0"
     }
   }
 }

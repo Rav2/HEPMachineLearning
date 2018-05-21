@@ -1,5 +1,4 @@
 
-
 """
 
 
@@ -69,8 +68,9 @@ class Dnn_uniwersalny:
         self.nazwa_folderu=nazwa_folderu
         self.hidden_units=hidden_units
         self.wczytywacz=io.Io_tf_binary_general(nazwa_folderu,'r')
+        self.lista_transformacji=[]
         
-    def make_model(self,cathegorical_vocabulary_lists):
+    def make_model(self,cathegorical_vocabulary_lists={}):
         assert self.not_compiled
         my_feature_columns = []
         for k in self.wczytywacz.types().keys():
@@ -93,11 +93,17 @@ class Dnn_uniwersalny:
         self.feature_columns=my_feature_columns
         
         def input_fn( batch_size=100,buffer_size=1000,folder=self.nazwa_folderu,one_epoch=False,czy_shuffle=True
-                    ,czy_batch=True,take=False,ile_take=10000,kategoryczne=cathegorical_vocabulary_lists.keys()):
+                    ,czy_batch=True,take=False,ile_take=10000,kategoryczne=cathegorical_vocabulary_lists.keys(),
+                    lista_transformacji=self.lista_transformacji):
             """input function for training
             nazwy to lista nazw feature w kolejnosci wystepowania
             if one_epoch to tylko jedna epoka"""
-            dataset=io.Io_tf_binary_general(folder,'r').read()
+            io_gen=io.Io_tf_binary_general(folder,'r')
+            
+            for tran in lista_transformacji:
+                io_gen.engineer_feature(**tran)
+            dataset=io_gen.read()
+                
             def fun(f,l):
                 wyrzut=f.copy()
                 for k in kategoryczne:
@@ -130,7 +136,8 @@ class Dnn_uniwersalny:
         return self.wczytywacz.types()
     def engineer_feature(self,f,slownik,typ,nazwa):
         assert self.not_compiled
-        return self.wczytywacz.engineer_feature(f,slownik,typ,nazwa)
+        self.wczytywacz.engineer_feature(f,slownik,typ,nazwa)
+        self.lista_transformacji.append({'f':f,'slownik':slownik,'typ':typ,'nazwa':nazwa})
     def train(self,batch_size=128,buffer_size=1000,steps=3000):
         self.classifier.train(
         input_fn=lambda:self.input_fn( batch_size,buffer_size),
