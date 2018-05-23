@@ -6,7 +6,7 @@ import sys
 import json
 
 
-
+    
 """
 ten nowy bedzie uproszczony
 __init__(nazwa_folderu,tryb)
@@ -15,9 +15,20 @@ __init__(nazwa_folderu,tryb)
             nazwa_folderu: np "pierwszy_dataset" tam bedzie pisac/stamtad bedzie szczytywac. 
                 wydaje mi sie, ze musi byc to nazwa bez spacji oraz moze byc na przyklad "folder/subfolder"
             
-           
+write_general(features,l,przykladowy=False) 
+        features to slwonik features dla jednego przykladu np {"momentum":[1.,0.,5.,7.]}
+        moze liczbe lub liste lub np array typu jakiegos int lub jakiegos float
+        l to jest label jego 0 lub 1
+        to jest dostepne tylko w przypadku trybu 'w'
+        wygodna metoda do tego, azeby "potasowac" przyklady z roznych plikow w jeden dataset, bo pisze
+        sie przyklady w takiej formie w jakiej sie odczytywalo z tych datasetow. 
+        
+        parametr przykladowy sluzy do tego, ze jak chcemy uzyc .engineer_feature() w trybie 'w' to 
+        potrzeba podac przykladowe dane zeby obiekt wiedzial, czy dorabianie featcherow
+        jest poprawne. To bedzie ulatwiac uzytkownikowi zycie. 
 
-write_from_tree(legs,jets,global_params,properties,l,co_ile_flush_file=10)
+write_from_tree(legs,jets,global_params,properties,l,co_ile_flush_file=10,przykladowy=False)
+        metoda w prosty sposob korzystajaca z funkcji metody write_general
         dostepna tylko jak tryb to jest 'w'
             legs,jets,global_params,properties: jak w wyjsciu klasy read_tree, tylko "dla jednego przypadku"
                 wiec jest tak
@@ -29,8 +40,25 @@ write_from_tree(legs,jets,global_params,properties,l,co_ile_flush_file=10)
                          a 0 to taki bardziej tlo. to jest int 
                  co_ile_flush_file: to znaczy jak czesto ma oprozniac swoj buffer, liczy sie tylko
                     gdy tryb=='w', nie wiem ile ma wynosic,wiec jak wiesz to smialo ustaw
+        
+                parametr przykladowy sluzy do tego, ze jak chcemy uzyc .engineer_feature() w trybie 'w' to 
+        potrzeba podac przykladowe dane zeby obiekt wiedzial, czy dorabianie featcherow
+        jest poprawne. To bedzie ulatwiac uzytkownikowi zycie. 
+    
                     
-    to ma korzystac z write_old ma dwie kategori edanych listy i slowniki 
+write_from_tree_general(self,legs_list,properties_list,l,co_ile_flush_file=10,przykladowy=False)
+        nieco bardziej ogolna wersja poprzedniej metody, gdzie 
+        legs oraz jets jako obiekty tych samych typow zostaly wrzócone do tej samej
+        listy, tak samo global_params oraz properties. czyli zeby 
+        wywolac to tak jak poprzednia metode to piszemy
+        obiekt.write_from_tree_general([legs,jets],[global_params,properties],l)
+        i to robi to co poprzednia metoda, ale jes to epsion bardziej ogolne. 
+        znow jest zbudowane na bazie metody .write_general, wiec latwo zmienic. 
+        
+                parametr przykladowy sluzy do tego, ze jak chcemy uzyc .engineer_feature() w trybie 'w' to 
+        potrzeba podac przykladowe dane zeby obiekt wiedzial, czy dorabianie featcherow
+        jest poprawne. To bedzie ulatwiac uzytkownikowi zycie. 
+
     
 
 close()
@@ -51,23 +79,32 @@ types()
             zwraca slownik typow naszego datasetu. to znaczy, ze zwraca slownik
             {'nazwa_featchera':(4,'f')} jesli featcher o tej nazwie to lista 4 floatow
             
-write_general(features,l) 
-        features to slwonik features dla jednego przykladu np {"momentum":[1.,0.,5.,7.]}
-        moze liczbe lub liste lub np array typu jakiegos int lub jakiegos float
-        l to jest label jego 0 lub 1
-        to jest dostepne tylko w przypadku trybu 'w'
-        wygodna metoda do tego, azeby "potasowac" przyklady z roznych plikow w jeden dataset, bo pisze
-        sie przyklady w takiej formie w jakiej sie odczytywalo z tych datasetow. 
+
+
+
 
 engineer_feature(self,f,slownik,typ,nazwa):
-        dostepna tylko w trybie 'w' czyli czytania
-    metoda ta sprawia, ze jak zrobisz .read() to dostaniesz dataset ktory ma taki fajny
-        nowy feature. Metoda ta zmienia wynik zadzialania metody .types(), mozna
+        w trybie 'r' dziala tak, ze bedzie nam dorabiac featchers 
+        tak 'on the fly' gdy bedziemy uzywac
+        metody .read(). Jezeli uzyjemy tej funkcji w trybie 'w' 
+        po inicjalizacji obiektu ,a nastepnie uzyjemy
+        jakiegos .write(przylkadowy=True) to to jest
+        czas na uzycie engineer_feature. mozna wiele
+        razy oczywiscie. 
+        potem jak uzyjemy .write() (bez przykladowy=True) to
+        zapisujemy juz korzystajac z tych naszych
+        dorobionych featcherow. a przed pierwszym .write_general() lub
+        jakim kolwiek innym .write który na .write_general() bazuje to to sprawi,
+        ze beda zapisywane na sztywno featchery w tym naszym pliku z danymi. 
+       
+        
         z powodzeniem uzywac wczesniej zrobionych features do produkcji jeszcze nowszych.
         nazwa: czyli jak ten nowy ma sie nazywac
         
         f: to funkcja przyjmująca argumenty o nazwach ze zbioru kluczy slownika slownik, 
-                zwraca zas nowy feature (czyli tensor o ksztalcie (-1,). musi to byc funkcja
+                zwraca zas nowy feature (czyli tensor o ksztalcie (-1,).
+                w trybie 'r'
+                musi to byc funkcja
                 dzialajaca dobrze na tensorach z tensorflow. To jest tak fajnie zaklepane, ze
                 wyrzuci blad jesli funkcja jest niepoprawna od razu przy wywolaniu tej 
                 engineer_feature.
@@ -76,6 +113,14 @@ engineer_feature(self,f,slownik,typ,nazwa):
                 scisle jednowymiarowych. Wynikiem tej funkcji czyli nowym featurem 
                 musi byc znowu tensor o ksztalcie
                 (-1,). 
+                
+                w trybie 'w' ta funkcja 'f' ma dzialac nie na tensorflowowe tensory
+                a na takiego typu tensory, co sa w naszych danych ktorymi karmimy
+                w .write_general. 
+                
+                w trybie 'r' jak podacie zla funkcje f to metoda engineer_feature od 
+                razu wyrzuca blad, zas w trybie 'w' nie wyrzuca od razu bledu dopiero
+                przy zapisywani pojawi się jakis dziwny blad. 
         
         
                 https://www.tensorflow.org/api_guides/python/math_ops
@@ -119,11 +164,25 @@ class Io_tf_binary_general:
                 self.nazwa_folderu+"/dane",slownik_typow,self.tryb)
         
         self.nowopowstala=True
+        if self.tryb=='w':
+            self.new_featcheres=[]
+            self.typy={}
+            self.typy_pierwsze={}
+            self.juz_poznane=False
         
     def engineer_feature(self,f,slownik,typ,nazwa):
-        assert self.tryb=='r'
-        assert not (nazwa in self.wewnetrzny.types().keys())
-        self.wewnetrzny.engineer_feature(f,slownik,typ,nazwa)
+        if self.tryb=='r':
+            assert not (nazwa in self.wewnetrzny.types().keys())
+            self.wewnetrzny.engineer_feature(f,slownik,typ,nazwa)
+        else:
+            assert not (nazwa in self.przyklad.keys())
+            podstawienia={}
+            for k in slownik.keys():
+                podstawienia[k]=self.przyklad[slownik[k]]
+            self.przyklad[nazwa]=f(**podstawienia)
+            self.new_featcheres.append(
+            {'f':f,'slownik':slownik,'typ':typ,'nazwa':nazwa})
+            self.typy[nazwa]=typ
         
         
     
@@ -220,7 +279,7 @@ class Io_tf_binary_general:
     
     
     
-    def write_from_tree(self,legs,jets,global_params,properties,l,co_ile_flush_file=10):
+    def write_from_tree(self,legs,jets,global_params,properties,l,co_ile_flush_file=10,przykladowy=False):
         #zakladam, ze legs to jest lista o shapie (?,4) wypelniona floatami
         #jets dokladnie tak samo
         #global_params to jest w postaci {nazwa:liczba, ...}
@@ -239,10 +298,10 @@ class Io_tf_binary_general:
         #assert self.typy_pierwszego==slownik
         
         
-        self.wpisz_general(f,l)
+        self.write_general(f,l,przykladowy=przykladowy)
     
     
-    def write_from_tree_general(self,legs_list,properties_list,l,co_ile_flush_file=10):
+    def write_from_tree_general(self,legs_list,properties_list,l,co_ile_flush_file=10,przykladowy=False):
         #zakladam, ze legs to jest lista o shapie (?,4) wypelniona floatami
         #jets dokladnie tak samo
         #global_params to jest w postaci {nazwa:liczba, ...}
@@ -261,25 +320,40 @@ class Io_tf_binary_general:
         #assert self.typy_pierwszego==slownik
         
         
-        self.wpisz_general(f,l)
+        self.write_general(f,l,przykladowy=przykladowy)
     
     
         
-    def write_general(self,features,l,co_ile_flush_file=10):
+    def write_general(self,features,l,co_ile_flush_file=10,przykladowy=False):
         assert self.tryb=='w'
-        if self.nowopowstala==True:
-            os.system("mkdir "+self.nazwa_folderu)
-            self.nowopowstala=False
+        if not przykladowy:
+            if self.nowopowstala==True:
+                os.system("mkdir "+self.nazwa_folderu)
+                self.nowopowstala=False
+                slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(features)
+                if  (self.typy_pierwsze=={}):
+                    self.typy_pierwszego=slownik
+                else:
+                    self.typy_pierwszego=self.typy_pierwsze
+                if not self.juz_poznane:
+                    self.typy=Io_tf_binary_general.zrob_slownik_typow_old_format(features)
+                Io_tf_binary_general.zapisz_json(self.typy,self.nazwa_folderu+"/metadata")
+                self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
+                    self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
             slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(features)
-            self.typy_pierwszego=slownik
-            Io_tf_binary_general.zapisz_json(slownik,self.nazwa_folderu+"/metadata")
-            self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
-                self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
-        slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(features)
-        assert self.typy_pierwszego==slownik
+            assert self.typy_pierwszego==slownik
+
+
+            self.stary_io.wpisz(features,l,self.new_featcheres)
+        else:
+            assert self.nowopowstala
+            assert self.juz_poznane==False
+            self.juz_poznane=True
+            self.przyklad=features
+            self.typy=Io_tf_binary_general.zrob_slownik_typow_old_format(self.przyklad)
+            self.typy_pierwsze=self.typy.copy()
+            
         
-        
-        self.stary_io.wpisz(features,l)
             
             
         
@@ -297,10 +371,7 @@ class Io_tf_binary_general:
     def types(self):
         if self.tryb=='r':
             return self.wewnetrzny.types()
-        if self.nowopowstala==False:
-            return self.self.typy_pierwszego
-        print ("jeszcze nic wpisales, wiec nie wiadomo")
-        return {}
+        return self.typy
         
     
     #jakby ktos kopiowal to to idzie dalej
@@ -378,11 +449,20 @@ class Io_tf_binary_general:
         """
 
 
-        def wpisz(self,features,label):
+        def wpisz(self,features,label,new_featcheres):
             """tworzy ten nasz dataset w pliku out_path 
             tu format jest taki jak byl na poczatku to znaczy taki slownik"""
             f=features
             l=label
+            
+            for fet in new_featcheres:
+                podstawienia={}
+                for k in fet['slownik'].keys():
+                    podstawienia[k]=f[fet['slownik'][k]]
+                f[fet['nazwa']]=fet['f'](**podstawienia)
+                self.typy[fet['nazwa']]=fet['typ']
+            
+            
             def wrap_int64(value):
                 """lista intow musi wlesc"""
                 return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
@@ -504,6 +584,13 @@ class Io_tf_binary_general:
         def wczytaj_dataset(self):
             assert self.tryb=='r'
             return self.dataset
+    
+    
+    
+    
+    
+    
+    
     
     
     
