@@ -6,6 +6,7 @@ import sys
 import json
 
 
+
 """
 ten nowy bedzie uproszczony
 __init__(nazwa_folderu,tryb)
@@ -16,7 +17,7 @@ __init__(nazwa_folderu,tryb)
             
            
 
-write(legs,jets,global_params,properties,l,co_ile_flush_file=10)
+write_from_tree(legs,jets,global_params,properties,l,co_ile_flush_file=10)
         dostepna tylko jak tryb to jest 'w'
             legs,jets,global_params,properties: jak w wyjsciu klasy read_tree, tylko "dla jednego przypadku"
                 wiec jest tak
@@ -28,6 +29,9 @@ write(legs,jets,global_params,properties,l,co_ile_flush_file=10)
                          a 0 to taki bardziej tlo. to jest int 
                  co_ile_flush_file: to znaczy jak czesto ma oprozniac swoj buffer, liczy sie tylko
                     gdy tryb=='w', nie wiem ile ma wynosic,wiec jak wiesz to smialo ustaw
+                    
+    to ma korzystac z write_old ma dwie kategori edanych listy i slowniki 
+    
 
 close()
             dostepna tylko dla tryb=='w'
@@ -47,7 +51,7 @@ types()
             zwraca slownik typow naszego datasetu. to znaczy, ze zwraca slownik
             {'nazwa_featchera':(4,'f')} jesli featcher o tej nazwie to lista 4 floatow
             
-write_old(features,l) 
+write_general(features,l) 
         features to slwonik features dla jednego przykladu np {"momentum":[1.,0.,5.,7.]}
         moze liczbe lub liste lub np array typu jakiegos int lub jakiegos float
         l to jest label jego 0 lub 1
@@ -77,6 +81,8 @@ engineer_feature(self,f,slownik,typ,nazwa):
                 https://www.tensorflow.org/api_guides/python/math_ops
                 tu macie podstawowe operacje. pamietjcie, ze * oraz + tez mozna uzywac, ale
                 nie wszystkie funkcje z numpy sa dobre w tensorflow( to znaczy inaczej sie w nim nazywaja).
+czyli moze warto jednak zapisac te dane na dysk
+dwie opcje mają byc 
         
         slownik:  to slownik którego klucze sa ze zbioru nazw argumentow funkcji f zas 
             zas wartosci to sa nazwy rzeczy wystepujacych w kluczach slownika z metody .types()
@@ -92,7 +98,8 @@ engineer_feature(self,f,slownik,typ,nazwa):
             
 
 
-
+dorobic linki do dokumentacji
+mateusz zostanie testesterem.
 
 
 
@@ -190,28 +197,75 @@ class Io_tf_binary_general:
             f[k]=[properties[k]]
         return f,l
     
-    def write(self,legs,jets,global_params,properties,l,co_ile_flush_file=10):
+    
+    def zrob_sensowna_forme_general(legs_list,properties_list,l):
+        #l jest intem i to 0 lub 1
+        for i in range(len(legs_list)):
+            legs_list[i]=np.array(legs_list[i])
+#         n_legs=legs.shape[0]
+#         n_jets=jets.shape[0]
+
+        f={}
+
+        for j in range(len(legs_list)):
+            for i in range(legs_list[j].shape[0]):
+                f["leg_"+str(j)+"_"+str(i)+"_momentum"]=legs_list[j][i,:]
+
+
+        for i in range(len(properties_list)):
+            properties=properties_list[i]
+            for k in properties:
+                f[k+"_"+str(i)]=[properties[k]]
+        return f,l
+    
+    
+    
+    def write_from_tree(self,legs,jets,global_params,properties,l,co_ile_flush_file=10):
         #zakladam, ze legs to jest lista o shapie (?,4) wypelniona floatami
         #jets dokladnie tak samo
         #global_params to jest w postaci {nazwa:liczba, ...}
         #l jest intem i to 0 lub 1
         assert self.tryb=='w'
-        if self.nowopowstala==True:
-            os.system("mkdir "+self.nazwa_folderu)
-            self.nowopowstala=False
-            slownik= Io_tf_binary_general.zrob_slownik_typow(legs,jets,global_params,properties)
-            self.typy_pierwszego=slownik
-            Io_tf_binary_general.zapisz_json(slownik,self.nazwa_folderu+"/metadata")
-            self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
-                self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
+#         if self.nowopowstala==True:
+#             os.system("mkdir "+self.nazwa_folderu)
+#             self.nowopowstala=False
+#             slownik= Io_tf_binary_general.zrob_slownik_typow(legs,jets,global_params,properties)
+#             self.typy_pierwszego=slownik
+#             Io_tf_binary_general.zapisz_json(slownik,self.nazwa_folderu+"/metadata")
+#             self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
+#                 self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
         f,l=Io_tf_binary_general.zrob_sensowna_forme(legs,jets,global_params,properties,l)
-        slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(f)
-        assert self.typy_pierwszego==slownik
+        #slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(f)
+        #assert self.typy_pierwszego==slownik
         
         
-        self.stary_io.wpisz(f,l)
+        self.wpisz_general(f,l)
+    
+    
+    def write_from_tree_general(self,legs_list,properties_list,l,co_ile_flush_file=10):
+        #zakladam, ze legs to jest lista o shapie (?,4) wypelniona floatami
+        #jets dokladnie tak samo
+        #global_params to jest w postaci {nazwa:liczba, ...}
+        #l jest intem i to 0 lub 1
+        assert self.tryb=='w'
+#         if self.nowopowstala==True:
+#             os.system("mkdir "+self.nazwa_folderu)
+#             self.nowopowstala=False
+#             slownik= Io_tf_binary_general.zrob_slownik_typow(legs,jets,global_params,properties)
+#             self.typy_pierwszego=slownik
+#             Io_tf_binary_general.zapisz_json(slownik,self.nazwa_folderu+"/metadata")
+#             self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
+#                 self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
+        f,l=Io_tf_binary_general.zrob_sensowna_forme_general(legs_list,properties_list,l)
+        #slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(f)
+        #assert self.typy_pierwszego==slownik
         
-    def write_old(self,features,l,co_ile_flush_file=10):
+        
+        self.wpisz_general(f,l)
+    
+    
+        
+    def write_general(self,features,l,co_ile_flush_file=10):
         assert self.tryb=='w'
         if self.nowopowstala==True:
             os.system("mkdir "+self.nazwa_folderu)
@@ -450,6 +504,15 @@ class Io_tf_binary_general:
         def wczytaj_dataset(self):
             assert self.tryb=='r'
             return self.dataset
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
