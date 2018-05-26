@@ -7,25 +7,39 @@ import json
 
 
     
+import pickle
+
+
 """
 ten nowy bedzie uproszczony
 __init__(nazwa_folderu,tryb)
     inputs:
-            tryb: np 'r' lub 'w' i oznacza czy czytac ('r') czy pisac ('w')
             nazwa_folderu: np "pierwszy_dataset" tam bedzie pisac/stamtad bedzie szczytywac. 
                 wydaje mi sie, ze musi byc to nazwa bez spacji oraz moze byc na przyklad "folder/subfolder"
+                To zapisuje nie tylko same dane ale także pomocnicze dane do wczytywania ich.
+            tryb: np 'r' lub 'w' i oznacza czy czytac ('r') czy pisac ('w')
+
             
-write_general(features,l,przykladowy=False) 
-        features to slwonik features dla jednego przykladu np {"momentum":[1.,0.,5.,7.]}
-        moze liczbe lub liste lub np array typu jakiegos int lub jakiegos float
-        l to jest label jego 0 lub 1
-        to jest dostepne tylko w przypadku trybu 'w'
+write_general(features,l,przykladowy=False,co_ile_flush_file=10) 
+        UWAGA to jest dostepne tylko w przypadku trybu 'w'
+        
+        features: to slwonik features dla jednego przykladu np {"momentum":[1.,0.,5.,7.]}
+            moze liczbe lub liste lub np array typu jakiegos int lub jakiegos float
+        l: to jest label jego 0 lub 1. Nie jestem pewien czy da się wpisywać po prostu
+            tensorflowowe tensory tutaj. na pewno można numpy obiekty. Prawdopodobnie także
+            listy pythonowe. 
+
         wygodna metoda do tego, azeby "potasowac" przyklady z roznych plikow w jeden dataset, bo pisze
         sie przyklady w takiej formie w jakiej sie odczytywalo z tych datasetow. 
         
-        parametr przykladowy sluzy do tego, ze jak chcemy uzyc .engineer_feature() w trybie 'w' to 
-        potrzeba podac przykladowe dane zeby obiekt wiedzial, czy dorabianie featcherow
-        jest poprawne. To bedzie ulatwiac uzytkownikowi zycie. 
+        przykladowy: typu bool. Używamy niedomyślnej wartości True w przypadku, gdy utworzyliśmy obiekt
+            o trybie 'w' write i chcemy powiedzieć mu, jak wyglądać będa dane którymi zamierzamy go karmić. 
+            czyli takiemu obiektowi wystarczy podać jeden taki przykładowy. Daje mu to wiedzę o tym, jak 
+            dorabiać nowe featchers. To znaczy trzeba podać jeden przykładowy jeśli chcemy potem uzywać
+            .engineer_feature w tym trybie 'w'.
+        co_ile_flush_file to jest parametr oznaczający jak często mamy wyrzucać do pliku dane. 
+        można poeksperymentować z jego wartością. nie wiem ile to ma wynosić. Może duża wartość 
+        pozwoli szybciej zapisywać?
 
 write_from_tree(legs,jets,global_params,properties,l,co_ile_flush_file=10,przykladowy=False)
         metoda w prosty sposob korzystajaca z funkcji metody write_general
@@ -83,19 +97,25 @@ types()
 
 
 
-engineer_feature(self,f,slownik,typ,nazwa):
+engineer_feature(self,f,slownik,typ,nazwa,naprawde_zapisz=True):
+        To mozna uzywac w trybie 'w' jak i w trybie 'r', ale znaczenie jest inne. 
         w trybie 'r' dziala tak, ze bedzie nam dorabiac featchers 
-        tak 'on the fly' gdy bedziemy uzywac
-        metody .read(). Jezeli uzyjemy tej funkcji w trybie 'w' 
-        po inicjalizacji obiektu ,a nastepnie uzyjemy
-        jakiegos .write(przylkadowy=True) to to jest
-        czas na uzycie engineer_feature. mozna wiele
-        razy oczywiscie. 
-        potem jak uzyjemy .write() (bez przykladowy=True) to
-        zapisujemy juz korzystajac z tych naszych
-        dorobionych featcherow. a przed pierwszym .write_general() lub
-        jakim kolwiek innym .write który na .write_general() bazuje to to sprawi,
-        ze beda zapisywane na sztywno featchery w tym naszym pliku z danymi. 
+        tak 'on the fly' gdy uzyjemy
+        metody .read(). 
+        Jezeli uzyjemy tej funkcji w trybie 'w' to naszym celem jest 
+        dorobienie featcher w zapisanym binarnym pliku i zapisac nowe featchery. 
+        Tutaj instrukcja jest taka, ze po inicjalizacji obiektu typu 'w' 
+        uzywamy jednej z metod write costam, ale z parametrem 'przykladowy=True'. 
+        Teraz mozemy dorabiac featchers przy pomocy tej metody. w trakcie tego 
+        mozna sobie patrzeć przy pomocy metody .types() jak się nam zmieniają
+        typy featcherów jakie mamy. Nastepnie po zakończeniu tych czynnosći
+        zaczynamy uzywać normalnie metody .write costam bez parametru przykladowy. 
+        
+        Chciałem zrobić coś takiego, że w trybie 'w' podaje się do wyboru czy 
+        zapisywać powstały featcher na stałe w pliku z danymi czy jakoś zapamiętać że takie
+        coś ma być dorabiane w locie przy wczytywaniu, ale chyba nie da się 
+        
+        
        
         
         z powodzeniem uzywac wczesniej zrobionych features do produkcji jeszcze nowszych.
@@ -126,8 +146,7 @@ engineer_feature(self,f,slownik,typ,nazwa):
                 https://www.tensorflow.org/api_guides/python/math_ops
                 tu macie podstawowe operacje. pamietjcie, ze * oraz + tez mozna uzywac, ale
                 nie wszystkie funkcje z numpy sa dobre w tensorflow( to znaczy inaczej sie w nim nazywaja).
-czyli moze warto jednak zapisac te dane na dysk
-dwie opcje mają byc 
+
         
         slownik:  to slownik którego klucze sa ze zbioru nazw argumentow funkcji f zas 
             zas wartosci to sa nazwy rzeczy wystepujacych w kluczach slownika z metody .types()
@@ -136,41 +155,71 @@ dwie opcje mają byc
             feature bedzie mial 4 floaty. moze byc tez 'i'. oznacza, 
             czy to co powstaje bedzie intem czy floatem. 
             Tak wiem to leniwe, ale bardziej bugoodporne po mojej stronie. 
+        naprawde_zapisz: odnosi sie tylko do przypadku, gdy tryb to 'w' i oznacza odpowiedz na pytanie,
+            czy zapisac na dysku nasz nowy featcher czy tylko zapisac informacje o tym jak go odwtorzyc przy wczytywaniu. 
+            wazne
+            najpierw podajecie te ktore maja byc zapisane na stale. potem podajecie te ktora
+            maja byc zapisane na niby to znaczy naprawde_zapisz=False. Jest to po to, azeby
+            nie bylo tak, ze przy czytaniu datasetu trzeba korzystac z zmiennych ktorych nie ma.
+            Dodatkowo jest tak, ze jak dodajemy featcher na niby to w nim ta funkcja f musi 
+            czytać tensory typu tensorflow, zas jesli to jest featcher na prawde to 
+            wowczas ta funkcja f ma miec tylo taka wlasnosc, ze dziala dobrze na 
+            tensory wrzucane do metod write costam. 
             
-        
+
             
        
             
 
 
-dorobic linki do dokumentacji
-mateusz zostanie testesterem.
 
 
 
 
 """
+class Na_niby_featcher(object):
+    def __init__(self, eng):
+        self.eng=eng
+    def to_dict(self):
+        return self.eng
 
 
 class Io_tf_binary_general:
     def __init__(self,nazwa_folderu,tryb):
         
         self.nazwa_folderu=nazwa_folderu
+        def odczytaj_na_niby_featcheres():
+            with open(self.nazwa_folderu+'/on_the_fly_featcheres.pkl', 'rb') as input:
+                wyrzut=[]
+                rob=True
+                while rob:
+                    try:
+                        wyrzut.append(pickle.load(input))
+                    except:
+                        rob=False
+                return wyrzut
         self.tryb=tryb
         
         if tryb=='r':
             slownik_typow=Io_tf_binary_general.wczytaj_json(self.nazwa_folderu+"/metadata")
             self.wewnetrzny=Io_tf_binary_general.Io_tf_binary_stary(
                 self.nazwa_folderu+"/dane",slownik_typow,self.tryb)
+            na_niby_featchers=odczytaj_na_niby_featcheres()
+            for eng in na_niby_featchers:
+                self.wewnetrzny.engineer_feature(**(eng.to_dict()))
+            
         
         self.nowopowstala=True
         if self.tryb=='w':
-            self.new_featcheres=[]
-            self.typy={}
+            self.new_featcheres_naprawde_zapisz=[]
+            self.new_featcheres_na_niby_zapisz=[]
+            self.pojawilo_sie_na_niby=False
+            self.typy_naprawde={}
+            self.typy_naniby={}
             self.typy_pierwsze={}
             self.juz_poznane=False
         
-    def engineer_feature(self,f,slownik,typ,nazwa):
+    def engineer_feature(self,f,slownik,typ,nazwa,naprawde_zapisz=True):
         if self.tryb=='r':
             assert not (nazwa in self.wewnetrzny.types().keys())
             self.wewnetrzny.engineer_feature(f,slownik,typ,nazwa)
@@ -180,9 +229,19 @@ class Io_tf_binary_general:
             for k in slownik.keys():
                 podstawienia[k]=self.przyklad[slownik[k]]
             self.przyklad[nazwa]=f(**podstawienia)
-            self.new_featcheres.append(
+            #self.typy[nazwa]=typ
+            if naprawde_zapisz:
+                assert self.pojawilo_sie_na_niby==False
+                self.new_featcheres_naprawde_zapisz.append(
             {'f':f,'slownik':slownik,'typ':typ,'nazwa':nazwa})
-            self.typy[nazwa]=typ
+                self.typy_naprawde[nazwa]=typ
+                self.typy_naniby[nazwa]=typ
+            else:
+                self.pojawilo_sie_na_niby=True
+                self.new_featcheres_na_niby_zapisz.append(
+            {'f':f,'slownik':slownik,'typ':typ,'nazwa':nazwa})
+                self.typy_naniby[nazwa]=typ
+            
         
         
     
@@ -325,6 +384,18 @@ class Io_tf_binary_general:
     
         
     def write_general(self,features,l,co_ile_flush_file=10,przykladowy=False):
+        
+        def zrob_plik_na_niby_featchers():
+
+            with open(self.nazwa_folderu+'/on_the_fly_featcheres.pkl', 'wb') as output:
+                for eng in self.new_featcheres_na_niby_zapisz:
+                    naniby=Na_niby_featcher(eng)
+                    pickle.dump(naniby, output, pickle.HIGHEST_PROTOCOL)
+            
+
+                
+        
+        
         assert self.tryb=='w'
         if not przykladowy:
             if self.nowopowstala==True:
@@ -336,22 +407,26 @@ class Io_tf_binary_general:
                 else:
                     self.typy_pierwszego=self.typy_pierwsze
                 if not self.juz_poznane:
-                    self.typy=Io_tf_binary_general.zrob_slownik_typow_old_format(features)
-                Io_tf_binary_general.zapisz_json(self.typy,self.nazwa_folderu+"/metadata")
+                    self.typy_naprawde=Io_tf_binary_general.zrob_slownik_typow_old_format(features)
+                    self.typy_naniby=self.typy_naprawde.copy()
+                    self.typy_pierwsze=self.typy_naprawde.copy()
+                Io_tf_binary_general.zapisz_json(self.typy_naprawde,self.nazwa_folderu+"/metadata")
                 self.stary_io=Io_tf_binary_general.Io_tf_binary_stary(
                     self.nazwa_folderu+"/dane",slownik,self.tryb,co_ile_flush_file)
+                zrob_plik_na_niby_featchers()
             slownik= Io_tf_binary_general.zrob_slownik_typow_old_format(features)
             assert self.typy_pierwszego==slownik
 
 
-            self.stary_io.wpisz(features,l,self.new_featcheres)
+            self.stary_io.wpisz(features,l,self.new_featcheres_naprawde_zapisz)
         else:
             assert self.nowopowstala
             assert self.juz_poznane==False
             self.juz_poznane=True
             self.przyklad=features
-            self.typy=Io_tf_binary_general.zrob_slownik_typow_old_format(self.przyklad)
-            self.typy_pierwsze=self.typy.copy()
+            self.typy_naprawde=Io_tf_binary_general.zrob_slownik_typow_old_format(self.przyklad)
+            self.typy_naniby=self.typy_naprawde.copy()
+            self.typy_pierwsze=self.typy_naprawde.copy()
             
         
             
@@ -558,6 +633,10 @@ class Io_tf_binary_general:
 
 
         def engineer_feature(self,f,slownik,typ,nazwa):
+            print("taki tam engeenerowany featcher ")
+            print(nazwa)
+            print(typ)
+            print(slownik)
             assert self.tryb=='r'
             """ to ma zmienic po prostu nasz self.dataset"""
             def dodaj_jeden_feature(engineered,dataset):
@@ -584,6 +663,8 @@ class Io_tf_binary_general:
         def wczytaj_dataset(self):
             assert self.tryb=='r'
             return self.dataset
+    
+    
     
     
     
