@@ -56,7 +56,10 @@ int main(int argc, char ** argv)
 		    std::cout<<"Usage: readEvents cfg.init"<<std::endl;
 		    return 1;
 		  }
-		  else cfgFileName = argv[1];
+		  else 
+		  {
+		  	cfgFileName = argv[1];
+		  }
 
 
 		std::cout<<"Start"<<std::endl;
@@ -66,7 +69,9 @@ int main(int argc, char ** argv)
 		boost::property_tree::ptree pt;
 		boost::property_tree::ini_parser::read_ini(cfgFileName, pt);
 		std::string processName = pt.get<std::string>("TreeAnalyzer.processName","Test");
-
+		unsigned noOfThreads = pt.get("TreeAnalyzer.threads",1);
+		if(noOfThreads != 1)
+			std::cerr<<"[WARNING] Number of threads != 1. TTree output is available only in single thread mode."<<std::endl;
 		//Tell Root we want to be multi-threaded
 		ROOT::EnableThreadSafety();
 		//When threading, also have to keep ROOT from logging all TObjects into a list
@@ -90,7 +95,9 @@ int main(int argc, char ** argv)
 		 if(processName.find("Analysis")!=std::string::npos)
 		   {
 		   		myAnalyzers.push_back(new HTTAnalyzer("HTTAnalyzer",decayModeName));
-		   		myAnalyzers.push_back(new MLAnalyzer("MLAnalyzer",decayModeName));
+				// MLAnalyzer's purpose is to flush data to TTree, but this kind of output is disabled in multithread mode
+		   		if(processName=="AnalysisMuTau" and noOfThreads==1) 
+		   		 	myAnalyzers.push_back(new MLAnalyzer("MLAnalyzer",decayModeName));
 		   }
 		 else if(processName.find("Synch")!=std::string::npos)
 		   myAnalyzers.push_back(new HTTSynchNTuple("SynchNTuple",decayModeName));
@@ -100,8 +107,15 @@ int main(int argc, char ** argv)
 		 }
 
 		 TreeAnalyzer *tree = new TreeAnalyzer("TreeAnalyzer",cfgFileName, myEvent);
-		 tree->setObjectMessenger(new MLObjectMessenger("MLObjectMessenger created in HTTAnalysis.cc"));
-		 // std::cout<<"####################INIT: analyzers: "<<myAnalyzers.size()<<std::endl;
+		 
+		 // The type of created messenger can be adjusted to particular analysis
+		 ObjectMessenger* OMess;
+		 if(processName=="AnalysisMuTau" and noOfThreads==1)
+		 	OMess = new MLObjectMessenger("MLObjectMessenger created in HTTAnalysis.cc");
+		 else
+		 	OMess = new ObjectMessenger("ObjectMessenger created in HTTAnalysis.cc");
+		 tree->setObjectMessenger(OMess);
+
 		 tree->init(myAnalyzers);
 		 int nEventsAnalysed = tree->loop();
 		 tree->finalize();
@@ -118,6 +132,7 @@ int main(int argc, char ** argv)
 		 for(unsigned int i=0;i<myAnalyzers.size();++i) delete myAnalyzers[i];
 		 delete tree;
 		 delete myEvent;
+		 // delete messenger;
 
 		 std::cout<<"Done"<<std::endl;
 		 return 0;

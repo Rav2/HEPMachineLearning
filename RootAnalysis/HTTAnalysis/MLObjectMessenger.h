@@ -20,19 +20,17 @@ class MLObjectMessenger : public ObjectMessenger
  public:
   
   //! Constructor with object's name. The name should start with "ML";
-  inline MLObjectMessenger(const std::string& aName)
+  inline MLObjectMessenger(const std::string& aName) : ObjectMessenger(aName)
   {
-    std::string name = aName;
-    // if(aName.substr(0,2) != "ML")
-    //   name = std::string("ML")+aName;
-    myName_ = name;
+    // std::string name = aName;
+    // myName_ = name;
   }
 
   //! Destructor.
   virtual ~MLObjectMessenger(){;}
   
   //! Getter for the name.
-  const std::string & name(){return myName_;};
+  // virtual inline const std::string & name(){return myName_;};
 
   //! Method for putting an object into messenger
   template<typename T> inline void putObject(const T* obj, const std::string& flavour)

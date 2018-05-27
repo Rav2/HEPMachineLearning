@@ -35,11 +35,13 @@ class MLAnalyzer : public Analyzer
 };
   
 
-  virtual inline Analyzer * clone() const{ return 0;}
+  virtual Analyzer* clone() const;
   
   virtual bool analyze(const EventProxyBase& iEvent);
 
   virtual bool analyze(const EventProxyBase& iEvent, ObjectMessenger *aMessenger);
+
+  void performAnalysis(const EventProxyBase& iEvent, ObjectMessenger *aMessenger);
 
   virtual void finalize(){;};
 
@@ -55,6 +57,8 @@ class MLAnalyzer : public Analyzer
 
   //! Name of the config file, where properties of particles are set to be extracted from analysis.
   std::string cfgFileName;
+  //! Decay mode
+  std::string decayMode;
 
  protected:
 

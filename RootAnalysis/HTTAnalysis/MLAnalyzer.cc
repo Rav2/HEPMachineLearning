@@ -23,6 +23,7 @@
 MLAnalyzer::MLAnalyzer(const std::string & aName, const std::string & aDecayMode = "None") : Analyzer(aName)
 {
 	std::cout<<"[ML]\tCreation of MLAnalyzer object."<<std::endl;
+	decayMode = aDecayMode;
 	execution_counter_=0;
 	MLTree_=NULL;
 	cfgFileName = "ml_Properties.ini";
@@ -42,6 +43,16 @@ MLAnalyzer::~MLAnalyzer()
 {
 	std::cout<<"[ML]\t MLAnalyzer finished working."<<std::endl;
 }
+
+//! Clone maker
+/*
+* Dummy function requested by multithread framework. Can be developed for some useful purposes.
+*/
+Analyzer* MLAnalyzer::clone() const 
+{
+	MLAnalyzer* clone = new MLAnalyzer("MLAnalyzer cloned", decayMode);
+    return clone;
+};
 
 //! Clears the member field collections
 void MLAnalyzer::clear()
@@ -186,10 +197,11 @@ void MLAnalyzer::addBranch(TTree *tree)
 			tree->Branch("BJetBetaScore", &betaScore_);
 			tree->Branch("nJets30", &nJets30_);
 		}
+		else
+			std::cerr<<"[ML][WARNING] No tree to write to!"<<std::endl;
 	}
 	else
 	{
-
 		// Will execute once during the first call of MLAnalyzer::analyze()
 		std::cout<<"[ML]\tAdding more branches for ML analysis."<<std::endl;
 		std::string leg_s ("leg_");
@@ -261,7 +273,7 @@ void MLAnalyzer::addBranch(TTree *tree)
 		     std::throw_with_nested(std::runtime_error("[ERROR] UNKNOWN ERROR IN MLAnalyzer::addBranch!"));
 		} 
 
-		}
+	}
 }
 
 //! Populate member field collections with variables that will serve as bufors for saving data to TTree
@@ -423,72 +435,79 @@ void MLAnalyzer::globalsHTT(const MLObjectMessenger* mess, const std::vector<con
 	} 
 }
 
-//! The main function of the class, analyzes the event -- extracts necessary data to a TTree
+//! Analyzes the event -- extracts necessary data to a TTree
 /*!
 *	The function executes for each event and takes a pointer to MLObjectMessenger object. If the latter is not NULL,
 *	it will proceed to extract data: legs and jets four-momenta, particle properties loaded from external file and
 *	a few gloabl parameters for HTT analysis. One can easily get rid of the latter (or change to something else) by
 *	commenting out the call of globalsHTT() function.	
 */
-bool MLAnalyzer::analyze(const EventProxyBase& iEvent, ObjectMessenger *aMessenger)
+void MLAnalyzer::performAnalysis(const EventProxyBase& iEvent, ObjectMessenger *aMessenger)
 {
 	try
 	{
-		if(aMessenger and std::string("MLObjectMessenger").compare(0,17,aMessenger->name())) // if NULL it will do nothing
+		void* p = NULL; /*!< pointer that will be cast to apropriate type if needed */
+		MLObjectMessenger* mess = ((MLObjectMessenger*)aMessenger); 
+		const std::vector<const HTTParticle*>* legs = mess->getObjectVector(static_cast<HTTParticle*>(p), std::string("legs"));
+		const std::vector<const HTTParticle*>* jets = mess->getObjectVector(static_cast<HTTParticle*>(p), std::string("jets"));
+		const HTTAnalysis::sysEffects* aSystEffect = mess->getObject(static_cast< HTTAnalysis::sysEffects*>(p), std::string("systEffect"));
+
+		if(mess && aSystEffect && legs && jets)
 		{
-			void* p = NULL; /*!< pointer that will be cast to apropriate type if needed */
-			MLObjectMessenger* mess = ((MLObjectMessenger*)aMessenger); 
-			const std::vector<const HTTParticle*>* legs = mess->getObjectVector(static_cast<HTTParticle*>(p), std::string("legs"));
-			const std::vector<const HTTParticle*>* jets = mess->getObjectVector(static_cast<HTTParticle*>(p), std::string("jets"));
-			const HTTAnalysis::sysEffects* aSystEffect = mess->getObject(static_cast< HTTAnalysis::sysEffects*>(p), std::string("systEffect"));
-
-			if(mess && aSystEffect && legs && jets)
+			if(execution_counter_ == 0) // will execute only once at the beginning
 			{
-				if(execution_counter_ == 0) // will execute only once at the beginning
-				{
-					std::cout<<"[ML]\tMLAnalyzer starts working."<<std::endl;
-					// Number of leg and jet object must be constant! Objects can be dummy.
-					legs_no_ = legs->size();
-					jets_no_ = jets->size();
-					// Knowing the number of jets and legs fix the selections to match it (remove 1000 dummy values)
-					fixSelections();
-					// Stuff to do at the first execution, e.g. assigning branches
-					prepareVariables(legs, jets); // prepare bufors
-					addBranch(MLTree_);	// add branches
-					
-				}
-				if(legs->size()>0)
-					execution_counter_++; /*!< count the number of calls of this function */
-
-				if(jets->size() != jets_no_ || legs->size() != legs_no_)
-					throw std::logic_error("[ERROR] MLAnalyzer REQUIRES CONSTANT NUMBER OF JETS AND LEGS IN EACH CALL!");
-				// variable "no" ensures assigning values to correct leg/jet; it has to be set to 0 before for_each
-				unsigned no = 0;
-				std::for_each(legs->begin(), legs->end(), [&](const HTTParticle* leg)
-				{
-					extractP4(leg->getP4(*aSystEffect), std::string("legs"), no); // copy P4 to bufors
-					no++;
-				});
-				no = 0;
-				std::for_each(jets->begin(), jets->end(), [&](const HTTParticle* jet)
-				{
-					extractP4(jet->getP4(*aSystEffect), std::string("jets"), no); // copy P4 to bufors
-				});
-
-				// Extract values of properties defined in PropertyEnum.h and selected in external file
-				extractParticleProperties(legs, jets);
-				// Dealing with global parameters, one can put here another function for other analysis
-				globalsHTT(const_cast<const MLObjectMessenger*>(mess), legs, aSystEffect);
-				
-				// Cleaning the content of ObjectMessenger NO DELETE IS CALLED!!!
-				mess->clear();
+				std::cout<<"[ML]\tMLAnalyzer starts working."<<std::endl;
+				// Number of leg and jet object must be constant! Objects can be dummy.
+				legs_no_ = legs->size();
+				jets_no_ = jets->size();
+				// Knowing the number of jets and legs fix the selections to match it (remove 1000 dummy values)
+				fixSelections();
+				// Stuff to do at the first execution, e.g. assigning branches
+				prepareVariables(legs, jets); // prepare bufors
+				addBranch(MLTree_);	// add branches	
 			}
+			if(legs->size()>0)
+				execution_counter_++; /*!< count the number of calls of this function */
 
+			if(jets->size() != jets_no_ || legs->size() != legs_no_)
+				throw std::logic_error("[ERROR] MLAnalyzer REQUIRES CONSTANT NUMBER OF JETS AND LEGS IN EACH CALL!");
+			// variable "no" ensures assigning values to correct leg/jet; it has to be set to 0 before for_each
+			unsigned no = 0;
+			std::for_each(legs->begin(), legs->end(), [&](const HTTParticle* leg)
+			{
+				extractP4(leg->getP4(*aSystEffect), std::string("legs"), no); // copy P4 to bufors
+				no++;
+			});
+			no = 0;
+			std::for_each(jets->begin(), jets->end(), [&](const HTTParticle* jet)
+			{
+				extractP4(jet->getP4(*aSystEffect), std::string("jets"), no); // copy P4 to bufors
+			});
+
+			// Extract values of properties defined in PropertyEnum.h and selected in external file
+			extractParticleProperties(legs, jets);
+			// Dealing with global parameters, one can put here another function for other analysis
+			globalsHTT(const_cast<const MLObjectMessenger*>(mess), legs, aSystEffect);
+			
+			// Cleaning the content of ObjectMessenger NO DELETE IS CALLED!!!
+			mess->clear();
 		}
 	}
 	catch(const std::exception& e)
 	{
-		std::throw_with_nested(std::runtime_error("[ERROR] UNKNOWN ERROR IN MLAnalyzer::analyze!"));
+		std::throw_with_nested(std::runtime_error("[ERROR] UNKNOWN ERROR IN MLAnalyzer::performAnalysis!"));
+	}
+}
+
+//! The main function of the class, analyzes the event -- extracts necessary data to a TTree
+/*!
+*	Executes performAnalysis function.
+*/
+bool MLAnalyzer::analyze(const EventProxyBase& iEvent, ObjectMessenger *aMessenger)
+{
+	if(MLTree_ and aMessenger and std::string("MLObjectMessenger").compare((aMessenger->name()).substr(0,17))==0) // if NULL it will do nothing
+	{
+		performAnalysis(iEvent, aMessenger);
 	}
 	return true;
 }
@@ -498,6 +517,8 @@ bool MLAnalyzer::analyze(const EventProxyBase& iEvent)
 {
 	return analyze(iEvent, NULL);
 }
+
+
 
 
 

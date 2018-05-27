@@ -130,7 +130,7 @@ void HTTAnalyzer::setAnalysisObjects(const EventProxyHTT & myEventProxy){
 }
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void HTTAnalyzer::addBranch(TTree *tree){ /*tree->Branch("nJets30",&nJets30);*/}
+void HTTAnalyzer::addBranch(TTree *tree){ tree->Branch("nJets30",&nJets30);}
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void HTTAnalyzer::fillControlHistos(const std::string & hNameSuffix, float eventWeight,
@@ -317,7 +317,7 @@ bool HTTAnalyzer::analyze(const EventProxyBase& iEvent, ObjectMessenger *aMessen
                         // Data being put to MLObjectMessenger
                         
                 }
-                if(aMessenger)
+                if(aMessenger and std::string("MLObjectMessenger").compare((aMessenger->name()).substr(0,17))==0 ) // if NULL it will do nothing
                 {
                     // Putting data to MLObjectMessenger
                     try
