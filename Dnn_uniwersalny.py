@@ -1,4 +1,5 @@
 
+
 """
 
 
@@ -14,12 +15,18 @@ Na razie w pierwszym rzucie nie bedzie jeszcze danych typu kategorycznego.
 
 To ma byc kompatybilne z klasa Io_tf_binary_general
 
-__init__(nazwa_folderu,hidden_units,model_dir)
+
+
+__init__(nazwa_folderu,hidden_units,model_dir,czy_nowy=True)
         to jest nazwa_folderu odnosi sie do folderu w ktorym pisala klasa
         Io_tf_binary_general czy cos
         hidden_units to jest lista po ile ma byc ukrytych unitsow. czyli nie podajemy rozmiaru
         danych wejsciowych ani wyjsciowych. idziemy od pierwszej (najblizszej inputu) do ostatniej
         model_dir to tam bedzie pisac swoje rzeczy nasz model
+        czy_nowy: to znaczy, czy tworzymy nowy model czy probojemy wczytac model ktory
+        kiedys sie liczyl i ma juz dosyc dobre wagi? (sa subtelnosci z uzywaniem
+        enginner_featcher na poziomie tego uniwersalnego dnn_estimatora, to znaczy
+        trzeba dac takie same enginner featcher jak ma dzialac.)
 engineer_feature(self,f,slownik,typ,nazwa)
         dokladnie jak w tamtym dla io_tf_binary_general
 make_model(self,cathegorical_vocabulary_lists):
@@ -29,6 +36,10 @@ make_model(self,cathegorical_vocabulary_lists):
         {'jakies_id':[1,2,3]} to znaczy, ze takie cos moze miec takie wartosci. w kluczach
         sa tylko kategoryczne argumenty. Wazne, ze to maja byc integery a nie na przyklad
         floaty czy inne takie. stringow tez nie obsluguję. 
+        
+        Teraz dodaje normalizacje danych wejsciowych. odbedzie sie w trakcie wykonywania
+        make_model. Normalizuje tylko dane floatowe, zakladajac, ze te intowe 
+        to sa jakies znormalizowane.
 train 
         jest self explainatory. wydaje mi sie, ze to robi tak, ze kontynuuje
         trenowanie z miejsca w ktorym skonczylo
@@ -36,6 +47,9 @@ evaluate
         to jest zwykla ewaluacja. tyle, ze mozna podac jako argument "folder" z ktorego pochodza nasze dane.
         ale ta funkcja zawsze dziala tak, ze po prostu traktuje 1 jako prawdziwe przypadki a 
         0 jako tlo
+ma tez rysowac roc czy cos takiego. 
+niech evaluate daje nam zbior punktow na krzywej roc a potem 
+niech bedzie metoda rotate na przyklad ktora nam zrobi krzywa roc dla odrozniania prawdziwych klas
 evaluate_jak_z_pracy(self,p0to1,p1to1,ile_take=10000,folder="")
         to robi takie szacowanie krzywej roc oraz auc wartosci jak w tej pracy. tutaj podajemy
         jako folder te nasze przypadki. ile_take to znaczy jak wiele przypadkow z tego datasetu
@@ -48,6 +62,13 @@ types()
         po tym jak zrobisz feature engineering to sie zmieni wynik podzialania .types()
 
         
+niech w trakcie train niech pojawi sie accuracy co step.
+mozna by sprobopwac tensorboarda. dodac do tensorboard zmienne do monitorowania.
+Tu jest taki artefakt, ze ten area under curve czasem jest więcej niz 1 i to nie za dobrze.
+.
+Dodaj normalizacje oraz zapisz po tym jak przeleci przez dane treningowe. 
+
+
 
 
 
@@ -59,18 +80,45 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import Io_tf_binary_general as io
+import json
 
 
 class Dnn_uniwersalny:
-    def __init__(self,nazwa_folderu,hidden_units,model_dir):
+    def __init__(self,nazwa_folderu,hidden_units,model_dir,czy_nowy=True):
         self.not_compiled=True
         self.model_dir=model_dir
         self.nazwa_folderu=nazwa_folderu
         self.hidden_units=hidden_units
         self.wczytywacz=io.Io_tf_binary_general(nazwa_folderu,'r')
         self.lista_transformacji=[]
+        self.czy_nowy=czy_nowy
+    def licz_normalizacje(wczytywacz,na_ilu):
+        dataset=wczytywacz.read()
+        typy=wczytywacz.types()
+
+        zbachowany=dataset.repeat().batch(na_ilu)
+        iterator = zbachowany.make_one_shot_iterator()
+        para=iterator.get_next()
+        def mean_var(para,k):
+            return tf.nn.moments(para[0][k],axes=[0])
+            # gdzie var to jest to podniesione do kwadratu cos
+        mean_slownik={}
+        sig_slownik={}
+        for k in typy.keys():
+            if typy[k][1]=='f':
+                mean,var=mean_var(para,k)
+                mean_slownik[k]=mean
+                sig_slownik[k]=var**(0.5)
+        return mean_slownik,sig_slownik
+
+    def zapisz_json(co,gdzie):
+        f=open(gdzie,'w')
+        f.write(json.dumps(co))
+    def wczytaj_json(skad):
+        f=open(skad,'r')
+        return json.loads(f.read())
         
-    def make_model(self,cathegorical_vocabulary_lists={}):
+    def make_model(self,cathegorical_vocabulary_lists={},na_ilu_liczyc_mean_oraz_sigma=10000):
         assert self.not_compiled
         my_feature_columns = []
         for k in self.wczytywacz.types().keys():
@@ -81,6 +129,7 @@ class Dnn_uniwersalny:
                     t=tf.int32
                 my_feature_columns.append(tf.feature_column.numeric_column(key=k,shape=\
                             (self.wczytywacz.types()[k][0],),dtype=t ))
+                
             else:
                 assert self.wczytywacz.types()[k][1]=='i'
                 my_feature_columns.append(
@@ -92,9 +141,34 @@ class Dnn_uniwersalny:
     ),len(cathegorical_vocabulary_lists[k])))
         self.feature_columns=my_feature_columns
         
+        if self.czy_nowy:
+            dict_of_means,dict_of_sigmas=Dnn_uniwersalny.licz_normalizacje(self.wczytywacz,
+                                na_ilu_liczyc_mean_oraz_sigma)
+            with tf.Session() as sess:
+                def zlistoj(slownik):
+                    wyrzut=slownik.copy()
+                    for k in slownik.keys():
+                        wyrzut[k]=list(slownik[k])
+                        for i in range(len(wyrzut[k])):
+                            wyrzut[k][i]=float(wyrzut[k][i])
+                    return wyrzut
+                Dnn_uniwersalny.zapisz_json(zlistoj(sess.run(dict_of_means)),self.model_dir+"/means")
+                Dnn_uniwersalny.zapisz_json(zlistoj(sess.run(dict_of_sigmas)),self.model_dir+"/sigmas")
+            
+            
+        def znumpyuj(slownik):
+            wyrzut=slownik.copy()
+            for k in slownik.keys():
+                wyrzut[k]=np.array(slownik[k])
+            return wyrzut
+        dict_of_means=znumpyuj(Dnn_uniwersalny.wczytaj_json(self.model_dir+'/means'))
+        dict_of_sigmas=znumpyuj(Dnn_uniwersalny.wczytaj_json(self.model_dir+'/sigmas'))
+            
+        
         def input_fn( batch_size=100,buffer_size=1000,folder=self.nazwa_folderu,one_epoch=False,czy_shuffle=True
                     ,czy_batch=True,take=False,ile_take=10000,kategoryczne=cathegorical_vocabulary_lists.keys(),
-                    lista_transformacji=self.lista_transformacji):
+                    lista_transformacji=self.lista_transformacji,dict_of_means=dict_of_means,
+                    dict_of_sigmas=dict_of_sigmas):
             """input function for training
             nazwy to lista nazw feature w kolejnosci wystepowania
             if one_epoch to tylko jedna epoka"""
@@ -109,9 +183,15 @@ class Dnn_uniwersalny:
                 for k in kategoryczne:
                     wyrzut[k]=tf.reshape(f[k],shape=[])
                 return wyrzut,l
+            def normalizacja(f,l):
+                wyrzut=f.copy()
+                for k in dict_of_means.keys():
+                    wyrzut[k]=(f[k]-dict_of_means[k])/dict_of_sigmas[k]
+                return wyrzut,l
                 
             
             dataset=dataset.map(fun)
+            dataset=dataset.map(normalizacja)
             if take:
                 dataset=dataset.take(ile_take)
             if czy_shuffle:
@@ -129,7 +209,7 @@ class Dnn_uniwersalny:
         self.classifier = tf.estimator.DNNClassifier(
         feature_columns=self.feature_columns,
         hidden_units=self.hidden_units,
-        model_dir=self.model_dir,
+        model_dir=self.model_dir+'/tensorflowowy',
         n_classes=2)
         self.not_compiled=False
     def types():
