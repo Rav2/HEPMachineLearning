@@ -81,6 +81,7 @@ import matplotlib.pyplot as plt
 
 import Io_tf_binary_general as io
 import json
+import os
 
 
 class Dnn_uniwersalny:
@@ -88,6 +89,7 @@ class Dnn_uniwersalny:
         self.not_compiled=True
         self.model_dir=model_dir
         self.nazwa_folderu=nazwa_folderu
+        os.system("mkdir "+model_dir)
         self.hidden_units=hidden_units
         self.wczytywacz=io.Io_tf_binary_general(nazwa_folderu,'r')
         self.lista_transformacji=[]
@@ -212,7 +214,7 @@ class Dnn_uniwersalny:
         model_dir=self.model_dir+'/tensorflowowy',
         n_classes=2)
         self.not_compiled=False
-    def types():
+    def types(self):
         return self.wczytywacz.types()
     def engineer_feature(self,f,slownik,typ,nazwa):
         assert self.not_compiled

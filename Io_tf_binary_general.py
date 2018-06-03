@@ -2,14 +2,11 @@ import tensorflow as tf
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import read_tree as rt
+
 import sys
 import json
-
-
-    
 import pickle
-
-
 """
 ten nowy bedzie uproszczony
 __init__(nazwa_folderu,tryb)
@@ -446,7 +443,7 @@ class Io_tf_binary_general:
     def types(self):
         if self.tryb=='r':
             return self.wewnetrzny.types()
-        return self.typy
+        return self.typy_naniby
         
     
     #jakby ktos kopiowal to to idzie dalej
@@ -663,25 +660,6 @@ class Io_tf_binary_general:
         def wczytaj_dataset(self):
             assert self.tryb=='r'
             return self.dataset
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
