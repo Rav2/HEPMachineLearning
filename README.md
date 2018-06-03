@@ -8,6 +8,9 @@ Project devoted to use of Machine Learning to analyze date from the CMS experime
 * Rafal Maselek
 
 ###Pawla notatki o tym co znacza dane pliki
+Teraz pojawila sie Przyklad_nowej_funkcjonalnosci.ipynb ktory zawiera
+to co nazwa wskazuje.
+
 Dnn_uniwersalny.py to wazny plik, zawiera klase
 bedaca siecia neuronowa ktora potrafi czytac dane binarne zapisane przez
 inne klasy projektu oraz zna weak supervised algorithm.

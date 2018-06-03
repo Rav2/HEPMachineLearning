@@ -74,6 +74,7 @@ Dodaj normalizacje oraz zapisz po tym jak przeleci przez dane treningowe.
 
 
 """
+
 from sklearn import metrics
 import tensorflow as tf
 import numpy as np
@@ -82,11 +83,23 @@ import matplotlib.pyplot as plt
 import Io_tf_binary_general as io
 import json
 import os
+import pickle
 
+class Na_niby_featcher(object):
+    def __init__(self, eng):
+        self.eng=eng
+    def to_dict(self):
+        return self.eng
 
 class Dnn_uniwersalny:
     def __init__(self,nazwa_folderu,hidden_units,model_dir,czy_nowy=True):
+        if czy_nowy:
+            assert not os.path.isdir(model_dir)
+            
+        
         self.not_compiled=True
+        if not czy_nowy:
+            self.not_compiled=False
         self.model_dir=model_dir
         self.nazwa_folderu=nazwa_folderu
         os.system("mkdir "+model_dir)
@@ -94,6 +107,8 @@ class Dnn_uniwersalny:
         self.wczytywacz=io.Io_tf_binary_general(nazwa_folderu,'r')
         self.lista_transformacji=[]
         self.czy_nowy=czy_nowy
+        self.czy_wczytane_typy=False
+
     def licz_normalizacje(wczytywacz,na_ilu):
         dataset=wczytywacz.read()
         typy=wczytywacz.types()
@@ -119,21 +134,47 @@ class Dnn_uniwersalny:
     def wczytaj_json(skad):
         f=open(skad,'r')
         return json.loads(f.read())
+    def odczytaj_na_niby_featcheres(self):
+        with open(self.model_dir+'/new_featchers.pkl', 'rb') as input:
+            wyrzut=[]
+            rob=True
+            while rob:
+                try:
+                    wyrzut.append(pickle.load(input).to_dict())
+                except:
+                    rob=False
+            return wyrzut
+    def zrob_plik_na_niby_featchers(self):
+
+        with open(self.model_dir+'/new_featchers.pkl', 'wb') as output:
+            for eng in self.lista_transformacji:
+                naniby=Na_niby_featcher(eng)
+                pickle.dump(naniby, output, pickle.HIGHEST_PROTOCOL)
         
     def make_model(self,cathegorical_vocabulary_lists={},na_ilu_liczyc_mean_oraz_sigma=10000):
-        assert self.not_compiled
+        if not self.czy_nowy:
+            assert cathegorical_vocabulary_lists=={}
+        assert self.not_compiled or (not self.czy_nowy)
+        if self.czy_nowy:
+            self.zrob_plik_na_niby_featchers()
+            Dnn_uniwersalny.zapisz_json(cathegorical_vocabulary_lists,self.model_dir+"/cathegorical")
+            Dnn_uniwersalny.zapisz_json(self.wczytywacz.types(),self.model_dir+'/typy')
+        cathegorical_vocabulary_lists=Dnn_uniwersalny.wczytaj_json(self.model_dir+"/cathegorical")
+        self.czy_wczytane_typy=True
+        self.typy_wczytane=Dnn_uniwersalny.wczytaj_json(self.model_dir+"/typy")
+        
         my_feature_columns = []
-        for k in self.wczytywacz.types().keys():
+        for k in self.typy_wczytane.keys():
             if not( k in cathegorical_vocabulary_lists.keys()):
-                if self.wczytywacz.types()[k][1]=='f':
+                if self.typy_wczytane[k][1]=='f':
                     t=tf.float32
                 else:
                     t=tf.int32
                 my_feature_columns.append(tf.feature_column.numeric_column(key=k,shape=\
-                            (self.wczytywacz.types()[k][0],),dtype=t ))
+                            (self.typy_wczytane[k][0],),dtype=t ))
                 
             else:
-                assert self.wczytywacz.types()[k][1]=='i'
+                assert self.typy_wczytane[k][1]=='i'
                 my_feature_columns.append(
                     
                     tf.feature_column.embedding_column(
@@ -156,8 +197,7 @@ class Dnn_uniwersalny:
                     return wyrzut
                 Dnn_uniwersalny.zapisz_json(zlistoj(sess.run(dict_of_means)),self.model_dir+"/means")
                 Dnn_uniwersalny.zapisz_json(zlistoj(sess.run(dict_of_sigmas)),self.model_dir+"/sigmas")
-            
-            
+        
         def znumpyuj(slownik):
             wyrzut=slownik.copy()
             for k in slownik.keys():
@@ -166,10 +206,11 @@ class Dnn_uniwersalny:
         dict_of_means=znumpyuj(Dnn_uniwersalny.wczytaj_json(self.model_dir+'/means'))
         dict_of_sigmas=znumpyuj(Dnn_uniwersalny.wczytaj_json(self.model_dir+'/sigmas'))
             
-        
+        self.lista_transformacji_wczytana=self.odczytaj_na_niby_featcheres()
+            
         def input_fn( batch_size=100,buffer_size=1000,folder=self.nazwa_folderu,one_epoch=False,czy_shuffle=True
                     ,czy_batch=True,take=False,ile_take=10000,kategoryczne=cathegorical_vocabulary_lists.keys(),
-                    lista_transformacji=self.lista_transformacji,dict_of_means=dict_of_means,
+                    lista_transformacji=self.lista_transformacji_wczytana,dict_of_means=dict_of_means,
                     dict_of_sigmas=dict_of_sigmas):
             """input function for training
             nazwy to lista nazw feature w kolejnosci wystepowania
@@ -215,6 +256,8 @@ class Dnn_uniwersalny:
         n_classes=2)
         self.not_compiled=False
     def types(self):
+        if self.czy_wczytane_typy:
+            return self.typy_wczytane
         return self.wczytywacz.types()
     def engineer_feature(self,f,slownik,typ,nazwa):
         assert self.not_compiled
