@@ -1,0 +1,69 @@
+Na poczatek instalujemy pyroota. jak zrobimy to co napisane jest pod spodem to bedziemy miec pyroota ale bedzie dziwny blad gdy 
+bedziemy probowali odpalic roota z kondolki, no ale nie mozna
+miec wszystkiego.
+
+To zaklada system ubuntu.
+
+na poczatek mozna zainstalowac sobie anakonde, zeby root
+ja widzial podczas instalacji (nie jestem pewien czy ta kolejnosc
+jest konieczna, ale mozna tak zrobic dla pewnosci)
+
+
+Na poczatek robimy instalacje jak na stronie
+http://tylern4.github.io/InstallRoot/
+Przepisuje te kroki z tej strony zeby nie zginely
+
+sudo apt-get install git cmake dpkg-dev python-dev make g++ gcc binutils libx11-dev libxpm-dev libxft-dev libxext-dev
+
+sudo apt-get install gfortran libssl-dev libpcre3-dev xlibmesa-glu-dev libglew1.5-dev libftgl-dev libmysqlclient-dev libfftw3-dev graphviz-dev libavahi-compat-libdnssd-dev libldap2-dev libxml2-dev libkrb5-dev libgsl0-dev libqt4-dev
+
+cd /usr/local/
+
+sudo git clone --depth 1 https://github.com/root-mirror/root.git
+
+sudo chown -R $(whoami):$(id -g -n $(whoami)) root
+
+cd root
+mkdir compile
+cd compile
+cmake -Dpython=ON -Droofit=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr/local/root ..
+make -j$(nproc)
+sudo make install
+
+cd /usr/local/root
+source bin/thisroot.sh
+
+nano ~/.bashrc
+
+i tu wpisujemy w tym pliku na koncu 
+#CERN ROOT
+export ROOTSYS=/usr/local/root
+export PATH=$ROOTSYS/bin:$PATH
+export PYTHONDIR=$ROOTSYS
+export LD_LIBRARY_PATH=$ROOTSYS/lib:$PYTHONDIR/lib:$ROOTSYS/bindings/pyroot:$LD_LIBRARY_PATH
+export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH:$ROOTSYS/bindings/pyroot
+
+
+
+
+
+
+
+
+
+
+
+
+
+Nastepny krok to utworzenie naszego virtual env na tej anakondzie
+czyli w konsolce piszemy
+
+
+
+conda create -n root_tensorflow pip python=3.6
+source activate root_tensorflow
+conda install -c anaconda pcre
+pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl
+conda install matplotlib
+conda install scikit-learn
+conda install -c anaconda future
