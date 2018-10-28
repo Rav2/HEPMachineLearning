@@ -4,7 +4,8 @@
  przeslales
 3. notebook wczytywanie_na_czysto.ipynb tworzy binarne tensorflowowe
  pliki zawierajace 
- tlo oraz sygnal ( trzeba w odpowiednim miejscu notebooka
+ tlo oraz sygnal (te foldery nazywac sie beda
+ wlasnie tlo oraz sygnal) ( trzeba w odpowiednim miejscu notebooka
  (3 komorka) wpisac sciezki/nazwy
  tych plikow, btw czy dobrze zdecydowalem co jest sygnalem ( rozpadem higgsa)
  a co tłem?)
@@ -40,5 +41,7 @@ pewnych problemow glebokich sieci neuronowych)
 Krotko mowiac mozna to [10] zmienic na cos innego np [100,10]
 Po takiej zmianie nalezy sprawdzic, jak dziala na val
 
-- mozna sie zastanowic nad tymi cloudami
+- mozna sie zastanowic nad tymi cloudami. Pewnie na naszychy kompach by
+ sie puszczalo cos w stylu wczytywanie_na_czysto.ipynb, a potem na chmurze
+ reszte dostarczajac chmurze foldery tlo oraz sygnal
 
