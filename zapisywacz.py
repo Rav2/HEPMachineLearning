@@ -28,6 +28,11 @@ def _int64_feature(values):
   """Returns an int64_list from a bool / enum / int / uint."""
   return tf.train.Feature(int64_list=tf.train.Int64List(value=values))
 
+def wczytaj_typy_numerycznych(nazwa_folderu):
+    return wczytaj_json(nazwa_folderu + '/n')
+def wczytaj_typy_kategorycznych(nazwa_folderu):
+    return wczytaj_json(nazwa_folderu + '/c')
+
 #nazwa tworzonego folderu, slownik typu nazwa -> rozmiar, c to typu nazwa -> lista_wartosci
 # zwraca typy numeryczych danych, typy kategorycznych danych, oraz
 #writer ktorym mozna pisac do pliku (nadpisywac chyba)
@@ -76,9 +81,9 @@ def zapisz_jeden_przyklad(n, c, l, lnt, lkt, writer):
 
 #tworzy slownik typo wpotrzebnych do parsowania
 def tworz_slownik_typow_potrzebny_do_parsowania(nazwa_folderu):
-    lista_numerycznych = wczytaj_json(nazwa_folderu + '/n')
+    lista_numerycznych = wczytaj_typy_numerycznych(nazwa_folderu)
     laczna_liczba = lista_numerycznych[len(lista_numerycznych) - 1][2]
-    lista_kategorycznych = wczytaj_json(nazwa_folderu + '/c')
+    lista_kategorycznych = wczytaj_typy_kategorycznych(nazwa_folderu)
 
     read_features= {}
     read_features['n'] = tf.FixedLenFeature([laczna_liczba], dtype=tf.float32)

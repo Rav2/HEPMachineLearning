@@ -38,4 +38,11 @@ dodatkowo sa zapisane jsonem listy.
 
 
 moze warto zaczac od tego, ze napisze jakas funkcje tora tworzay taki plik?
-to jest możliwe. czyli dostaje w argumentach l, n, c , gdzie to sa slowniki. 
+to jest możliwe. czyli dostaje w argumentach l, n, c , gdzie to sa slowniki, zas l to 
+    0 lub 1. 
+
+
+
+teraz ten model 
+zapisuej w 'mean' oraz 'var' ten mean oraz variance
+w folderze model jest model tensorflowowy
