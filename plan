@@ -1,0 +1,41 @@
+generalnie chce miec plik ktory ma taka wlasnosc, ze kazdy przypadek to 
+slownik ktory ma po prostu tablice floatow. 
+oraz do tego ma jakas liste jak sie nazywajaa te rzeczy oraz jak wiele ich jest tam
+
+jeszcze sa kategoryczne, ktore nie wiem jak zrobic. 
+
+https://www.tensorflow.org/api_docs/python/tf/feature_column/indicator_column
+
+tak trzeba obrac ta kategoryczna po prostu. 
+
+ale ciekawa rzecz to te 
+
+https://www.tensorflow.org/api_docs/python/tf/feature_column/embedding_column
+
+które na bieżąco uczą się jaki powinien być embedding
+
+
+jest normalizer_fn w numeric_column
+
+model dostanie wyjatkowe feature columny ktore mozna uzyc zamiast tych domyslnych
+
+
+
+czyli ostatecznie mamy takie rzeczy:
+plik z danymi ktory zawiera nastepujace nazwy rzeczy
+- l czyli label
+- n czyli numerical 
+- c czyli cathegorical 
+
+i tutaj cathegorical to jest tensor intow. 
+
+dodatkowo sa zapisane jsonem listy.  
+- numeryczna to lista krotek typu (nazwa, od, do) (posortowana)
+- kategoryczne to lista  krotek typu (nazwa, [jakie_rzeczy_sa_mozliwe])
+
+(pozniej moze dodam jeszcze cos do dorabiania swoich wlasnych rzeczy)
+
+
+
+moze warto zaczac od tego, ze napisze jakas funkcje tora tworzay taki plik?
+to jest możliwe. czyli dostaje w argumentach l, n, c , gdzie to sa slowniki. 
