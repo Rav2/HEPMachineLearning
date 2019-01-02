@@ -37,7 +37,7 @@ def wczytaj_typy_kategorycznych(nazwa_folderu):
 # zwraca typy numeryczych danych, typy kategorycznych danych, oraz
 #writer ktorym mozna pisac do pliku (nadpisywac chyba)
 #te zwracane uzywa sie w zapisz_jeden_przyklad
-def tworz_folder_na_podstawie_przykladowego(nazwa_folderu, n, c):
+def tworz_folder_do_zapisu(nazwa_folderu, n, c):
     assert not os.path.isdir(nazwa_folderu)
     os.mkdir(nazwa_folderu)
 
@@ -71,7 +71,7 @@ def zapisz_jeden_przyklad(n, c, l, lnt, lkt, writer):
     lista_kategorycznch= []
     for i in range(len(lkt)):
         rozwazany = lkt[i]
-        lista_kategorycznch += [c[rozwazany[0]] ]
+        lista_kategorycznch += [c[rozwazany[0]]]
     slownik_danych['c']= _int64_feature(lista_kategorycznch)
     
 

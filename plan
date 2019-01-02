@@ -46,3 +46,7 @@ to jest możliwe. czyli dostaje w argumentach l, n, c , gdzie to sa slowniki, za
 teraz ten model 
 zapisuej w 'mean' oraz 'var' ten mean oraz variance
 w folderze model jest model tensorflowowy
+
+
+moze sprawic, ze te kategoryczne sa zapisane z pewnym 
+przedrostkiem gwarantujacym, ze sie nie pomiesza?
