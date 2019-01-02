@@ -61,11 +61,14 @@ def tworz_folder_do_zapisu(nazwa_folderu, n, c):
 def zapisz_jeden_przyklad(n, c, l, lnt, lkt, writer):
     slownik_danych = {}
     slownik_danych['l'] = _int64_feature([l])
+
+    def poprawiacz_numerycznego(lista):
+        return list(np.array(lista).reshape((-1,)))
     
     lista_numerycznych = []
     for i in range(len(lnt)):
         rozwazany = lnt[i]
-        lista_numerycznych += n[rozwazany[0]]
+        lista_numerycznych += poprawiacz_numerycznego( n[ rozwazany[0] ] )
     slownik_danych['n']= _float_feature(lista_numerycznych)
 
     lista_kategorycznch= []
@@ -74,7 +77,6 @@ def zapisz_jeden_przyklad(n, c, l, lnt, lkt, writer):
         lista_kategorycznch += [c[rozwazany[0]]]
     slownik_danych['c']= _int64_feature(lista_kategorycznch)
     
-
     tr_ex = tf.train.Example(features= tf.train.Features(
         feature = slownik_danych))
     writer.write(tr_ex.SerializeToString())

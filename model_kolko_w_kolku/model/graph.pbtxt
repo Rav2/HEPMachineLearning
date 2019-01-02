@@ -1327,7 +1327,7 @@ node {
     key: "f"
     value {
       func {
-        name: "tf_map_func_RUyWiLxEtIA"
+        name: "tf_map_func_HvsHriqiXVc"
       }
     }
   }
@@ -16366,7 +16366,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_a11daf5084e24e3eb8b9ee3cb0ef6690/part"
+        string_val: "_temp_601a359cf7a8428a9be0bfb66a8737ee/part"
       }
     }
   }
@@ -17620,132 +17620,6 @@ library {
   }
   function {
     signature {
-      name: "tf_map_func_RUyWiLxEtIA"
-      input_arg {
-        name: "arg0_0"
-        type: DT_INT64
-      }
-      input_arg {
-        name: "arg1_0"
-        type: DT_INT64
-      }
-      input_arg {
-        name: "arg2_0"
-        type: DT_INT64
-      }
-      input_arg {
-        name: "arg3"
-        type: DT_FLOAT
-      }
-      output_arg {
-        name: "arg0"
-        type: DT_INT64
-      }
-      output_arg {
-        name: "arg1"
-        type: DT_INT64
-      }
-      output_arg {
-        name: "arg2"
-        type: DT_INT64
-      }
-      output_arg {
-        name: "truediv"
-        type: DT_FLOAT
-      }
-      description: "A wrapper for Defun that facilitates shape inference."
-    }
-    node_def {
-      name: "sub/y"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_FLOAT
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_FLOAT
-            tensor_shape {
-              dim {
-                size: 3
-              }
-            }
-            tensor_content: "F\206\237\273\237\331\226<c\312\224\275"
-          }
-        }
-      }
-    }
-    node_def {
-      name: "sub"
-      op: "Sub"
-      input: "arg3"
-      input: "sub/y:output:0"
-      attr {
-        key: "T"
-        value {
-          type: DT_FLOAT
-        }
-      }
-    }
-    node_def {
-      name: "truediv/y"
-      op: "Const"
-      attr {
-        key: "dtype"
-        value {
-          type: DT_FLOAT
-        }
-      }
-      attr {
-        key: "value"
-        value {
-          tensor {
-            dtype: DT_FLOAT
-            tensor_shape {
-              dim {
-                size: 3
-              }
-            }
-            tensor_content: "\320\036\017@\214\223\016@TN\203@"
-          }
-        }
-      }
-    }
-    node_def {
-      name: "truediv_0"
-      op: "RealDiv"
-      input: "sub:z:0"
-      input: "truediv/y:output:0"
-      attr {
-        key: "T"
-        value {
-          type: DT_FLOAT
-        }
-      }
-    }
-    ret {
-      key: "arg0"
-      value: "arg0_0"
-    }
-    ret {
-      key: "arg1"
-      value: "arg1_0"
-    }
-    ret {
-      key: "arg2"
-      value: "arg2_0"
-    }
-    ret {
-      key: "truediv"
-      value: "truediv_0:z:0"
-    }
-  }
-  function {
-    signature {
       name: "tf_map_func_Ack60ZCxJeY"
       input_arg {
         name: "arg0"
@@ -18090,6 +17964,132 @@ library {
     ret {
       key: "arg3"
       value: "arg3_0"
+    }
+  }
+  function {
+    signature {
+      name: "tf_map_func_HvsHriqiXVc"
+      input_arg {
+        name: "arg0_0"
+        type: DT_INT64
+      }
+      input_arg {
+        name: "arg1_0"
+        type: DT_INT64
+      }
+      input_arg {
+        name: "arg2_0"
+        type: DT_INT64
+      }
+      input_arg {
+        name: "arg3"
+        type: DT_FLOAT
+      }
+      output_arg {
+        name: "arg0"
+        type: DT_INT64
+      }
+      output_arg {
+        name: "arg1"
+        type: DT_INT64
+      }
+      output_arg {
+        name: "arg2"
+        type: DT_INT64
+      }
+      output_arg {
+        name: "truediv"
+        type: DT_FLOAT
+      }
+      description: "A wrapper for Defun that facilitates shape inference."
+    }
+    node_def {
+      name: "sub/y"
+      op: "Const"
+      attr {
+        key: "dtype"
+        value {
+          type: DT_FLOAT
+        }
+      }
+      attr {
+        key: "value"
+        value {
+          tensor {
+            dtype: DT_FLOAT
+            tensor_shape {
+              dim {
+                size: 3
+              }
+            }
+            tensor_content: "=B\307\274>\000\330<\276\254\231\275"
+          }
+        }
+      }
+    }
+    node_def {
+      name: "sub"
+      op: "Sub"
+      input: "arg3"
+      input: "sub/y:output:0"
+      attr {
+        key: "T"
+        value {
+          type: DT_FLOAT
+        }
+      }
+    }
+    node_def {
+      name: "truediv/y"
+      op: "Const"
+      attr {
+        key: "dtype"
+        value {
+          type: DT_FLOAT
+        }
+      }
+      attr {
+        key: "value"
+        value {
+          tensor {
+            dtype: DT_FLOAT
+            tensor_shape {
+              dim {
+                size: 3
+              }
+            }
+            tensor_content: "\000\376\016@\2062\020@o\\\203@"
+          }
+        }
+      }
+    }
+    node_def {
+      name: "truediv_0"
+      op: "RealDiv"
+      input: "sub:z:0"
+      input: "truediv/y:output:0"
+      attr {
+        key: "T"
+        value {
+          type: DT_FLOAT
+        }
+      }
+    }
+    ret {
+      key: "arg0"
+      value: "arg0_0"
+    }
+    ret {
+      key: "arg1"
+      value: "arg1_0"
+    }
+    ret {
+      key: "arg2"
+      value: "arg2_0"
+    }
+    ret {
+      key: "truediv"
+      value: "truediv_0:z:0"
     }
   }
 }
