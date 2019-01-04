@@ -1,0 +1,1 @@
+[["legs", 0, 8], ["jets", 8, 12], ["higgsMassTrans", 12, 13], ["higgsPT", 13, 14], ["visMass", 14, 15], ["leg_1_combreliso", 15, 16], ["leg_2_byCombinedIsolationDeltaBetaCorrRaw3Hits", 16, 17], ["leg_2_byIsolationMVArun2v1DBoldDMwLTraw", 17, 18]]
