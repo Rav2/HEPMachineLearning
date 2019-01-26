@@ -1,0 +1,17 @@
+
+co musi byc?
+
+moja kalsa zapisywacz musi zostac wzbogacona by zapisywac featchery ciagle, featchery kategoryczne, obserwowane
+rzeczy zarowno ciagle jak i kategoryczne, label i tak dalej. 
+zapisywacz musi wiedziec czy label jest kategoryczny czy moze ciagly
+
+model pewnie musi wiedziec z danych czy ma przewidywac ciagle czy moze nie ciagle
+
+uzytkownik implementuje funkcje ktora z wyciagnietych z pickla danych daje to co trzeba, a reszta
+automatycznie generuje te tyle co foldow datasetow. 
+
+Potrzebna takze inna klasa ktorej podaje sie ktory ma trenowac model i go trenuje, ewentualnie waliduje. 
+
+
+
+
