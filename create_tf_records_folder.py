@@ -3,9 +3,13 @@ import numpy as np
 import user_defined_function as user 
 import zapisywacz as zap
 
+#uses user_defined_function.py to create tfrrecord with 
+# zapisywacz.py module. 
+
 is_this_classification, num_features, cat_features, ig_num_features, \
             ig_cat_features, labels = user.get_data()
 
+#shuffles data before it will be stored. 
 n = len(labels) 
 permutation = np.random.permutation(n)
 def permutate_dict(d):
@@ -19,16 +23,11 @@ permutate_dict(ig_num_features)
 permutate_dict(ig_cat_features)
 
 
+#function useful to communicate with zapisywacz.py module. 
 def create_type_numerical(data_num):
     res = {}
     for k in data_num.keys():
         res[k] = len(data_num[k][0])
-    return res
-
-def take_ith_numerical(data_num, i):
-    res = {}
-    for k in data_num.keys():
-        res[k] = data_num[k][i]
     return res
 
 def create_type_categorical(data_cat):
@@ -37,6 +36,13 @@ def create_type_categorical(data_cat):
         res[k] = \
             list[set[list[data_cat[k].reshape((-1))]]]
     return res 
+
+#used to take i-th example
+def take_ith_numerical(data_num, i):
+    res = {}
+    for k in data_num.keys():
+        res[k] = data_num[k][i]
+    return res
 
 def take_ith_cathegorical(data_cat, i):
     res = {}
@@ -60,7 +66,8 @@ lnt, lkt, ig_nt, ig_kt, writer = \
     create_type_categorical(ig_cat_features),
      is_this_classification )
 
-for i in range(int(n / 2)):
+# I write here each example
+for i in range(int(n)):
     zap.zapisz_jeden_przyklad(
         take_ith_numerical(num_features, i),
         take_ith_cathegorical(cat_features, i), 
@@ -69,4 +76,6 @@ for i in range(int(n / 2)):
         take_ith_label(labels, i), 
         lnt, lkt, ig_nt, ig_kt, writer, is_this_classification
     )
+#i have to close writer. This is very important. 
+writer.close()
 

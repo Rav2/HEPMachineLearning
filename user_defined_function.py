@@ -1,13 +1,16 @@
 import numpy as np
 import pandas as pd
 
-batch_size = 4096
+#jest to jedyne miejsce w którym trzeba pisać coś zależnego od problemu. 
 
 #don't shuffle data. The framework will do it for you
 #return is_this_classification, numerical_features, cathegorical_features, 
-# (in both cases those are just dictionaries that give lets say 2 dim 
-# arrays), ig_numerical_features, ig_cathegorical_features 
-#(those are ignored data), labels
+# ig_numerical_features, ig_cathegorical_features 
+# where is_this_classification jest true jeśli to jest 
+# binarna klasyfikacja, dla regresji to jest false. 
+#. 4 ostatnie argumenty to slowniki ktore nazwom featcherow
+# przyporzadkowuja numpyowe tablice 2d, których pierwszy index
+# to index przypadku, a drugi odpowiada za dlugosc featcheru. 
 #kategoryczne rzeczy to inty zawsze, label takze jesli jest kategoryczny
 def get_data():
     zrodlo = "data/htt_features_train.pkl"

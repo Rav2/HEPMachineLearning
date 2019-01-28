@@ -31,7 +31,8 @@ def wczytaj_json(skad):
 
 # Zmienia nazwe kategorycznych feature tak, by
 # nie pomieszaly sie z wykorzystywanymi juz kluczami
-# w slowniku
+# w slowniku. Dzieki temu kategoryczne feature
+# moga sie nazywac np "c" albo "n"
 def powieksz_nazwe_kategorycznego(nazwa):
     return 'kat_fet_' + nazwa
 
@@ -74,10 +75,10 @@ def rob_feature_columns(nazwa_zrodla):
 # czy_cache to czy wczytac dane na ram w celu szybszego ich czyania
 def input_fn(zrodlo_danych, folder_modelu, batch_size,  
          czy_shuffle, ile_threadow, czy_repeat, buffer_size,
-         czy_cache ):
+         czy_cache):
     def wynikowa():
         mean, var = odczytaj_mean_var(folder_modelu)
-        dataset = zapisywacz.parsuj_i_batchuj_not_ignored(zrodlo_danych, batch_size, ile_threadow)
+        dataset = zapisywacz.parsuj_i_batchuj_not_ignored(zrodlo_danych, batch_size, ile_threadow, czy_shuffle, buffer_size)
         kategoryczne = zapisywacz.wczytaj_typy_kategorycznych(zrodlo_danych)
         if(czy_repeat):
             dataset = dataset.repeat()
@@ -95,8 +96,6 @@ def input_fn(zrodlo_danych, folder_modelu, batch_size,
         dataset = dataset.map(odczep_kategoryczne, num_parallel_calls = ile_threadow)
         dataset = dataset.map(normalizacja,num_parallel_calls = ile_threadow)
         dataset = dataset.map(wyrwij_label,num_parallel_calls = ile_threadow)
-        if czy_shuffle:
-            dataset = dataset.shuffle(buffer_size)
         dataset = dataset.prefetch(1)
         if czy_cache:
             dataset = dataset.cache()
@@ -123,7 +122,7 @@ def tworz_folder(nazwa_folderu, glowne_zrodlo_danych, hidden_units,
     zapisz_json(hidden_units, nazwa_folderu + '/hidden_units')
     zapisz_json(dropout, nazwa_folderu + '/dropout')
     def licz_statystyki(nazwa_zrodla, na_ilu):
-        dataset = zapisywacz.parsuj_i_batchuj_not_ignored(nazwa_zrodla, na_ilu, 1)
+        dataset = zapisywacz.parsuj_i_batchuj_not_ignored(nazwa_zrodla, na_ilu, 1, False, -1)
         iterator = dataset.make_one_shot_iterator()
         tab = iterator.get_next()['n']
         mean, variance = tf.nn.moments(tab, axes=[0])

@@ -23,10 +23,12 @@
 #       worka gdyz wowczas powstale pliki binarne sa
 #       mniejsze i szybciej sie je czyta i przetwarza 
 #       przy trenowaniu.
+# - "ig_n" czyli ignorowane numeryczne featchery
 # - 'c' czyli kategoryczne wartosci. To jest lista intow, gdzie
 #        kazdy int to jakas kategoryczna cecha np ladunek czegos. 
 #       znowu wrzucone do jednego worka z powodu checi 
 #       oszczedzania miejsca i przyspieszenia dzialania trenowania
+# - "ig_c" czyli ignorowane kategoryczne featchery
 #
 # W folderze z datasetem znajduja sie takze zapisane jsonem listy:
 # - W pliku 'n' jest 
@@ -34,10 +36,14 @@
 #   krotki (technicznie tez listy) (nazwa_feature, index_pocz, index_konc) gdzie
 #   index_pocz to index od ktorego zaczynaja sie flaoty tego feature w liscie
 #   skonkatenowanych numerycznch feature (czyli pod kluczem 'n' w zapisanym
-#   TFRecord pliku)
+#   TFRecord pliku), index_konc to za ostatni indeks obejmowany przez liczby
+#   z tego featcheru
 # - w pliku 'c' jest analogiczny opis kategorycznych danych, to znaczy
 #    jest zapisana jsonem lista gdzie elementy to 
 #   krotki (nazwa_feature, lista_mozliwych_wartosci_tego_feature)
+#   i te elementy tej listy występują w tej samej kolejności co 
+#   rzeczy pod kluczem "c" w zapisanym słowniku
+# - analogicznie sa "ig_n" oraz "ig_c" pliki. 
 import tensorflow as tf
 import numpy as np
 import json
@@ -46,7 +52,7 @@ import os
 
 
 #na poczatek ogolne funkcje
-
+#zapisujace i czytajace w json
 def zapisz_json(co,gdzie):
     f=open(gdzie,'w')
     f.write(json.dumps(co))
@@ -56,8 +62,8 @@ def wczytaj_json(skad):
     return json.loads(f.read())
 
 # The following functions can be used to convert a value to a type compatible
-# with tf.Example. values to lista takich rzeczy.
-
+# with tf.Example. values to listy. To jest do tego, by zapisac
+# cos jako string i moc pozniej wpisac do tfr records file. 
 def _bytes_feature(values):
   """Returns a bytes_list from a string / byte."""
   return tf.train.Feature(bytes_list=tf.train.BytesList(value=values))
@@ -78,6 +84,7 @@ def wczytaj_typy_numerycznych(nazwa_folderu):
 def wczytaj_typy_kategorycznych(nazwa_folderu):
     return wczytaj_json(nazwa_folderu + '/c')
 
+#to samo dla ignorowanych to jest odczytuje 
 def wczytaj_ig_typy_numerycznych(nazwa_folderu):
     return wczytaj_json(nazwa_folderu + '/ig_n')
 
@@ -94,7 +101,7 @@ def wczytaj_ig_typy_kategorycznych(nazwa_folderu):
 #numeryczne oraz kategoryczne rzeczy (przy uczeniu ma na nie nie patrzec)
 #dodatkowo dajemy is_this_classification, ktory odpowiada na pytanie, 
 #czy labelki to 0 1 czy moze sa to ciagle rzeczy. 
-# oprocz tego, ze tworzy folder to daje 3 rzeczy, ktore sa potrzebne
+# oprocz tego, ze tworzy folder to daje 5 rzeczy, ktore sa potrzebne
 # w funkcji 'zapisz_jeden_przyklad' to znaczy
 # zwraca typy numeryczych feature (czyli wnetrze
 # pliku 'n'), typy kategorycznych feature (wnetrze
@@ -187,7 +194,9 @@ def zapisz_jeden_przyklad(n, c, ig_n, ig_c, l, lnt, lkt, ig_lnt, ig_lkt, writer,
         feature = slownik_danych))
     writer.write(tr_ex.SerializeToString())
 
-#tworzy slownik typo wpotrzebnych do odczytania przykladu
+#tworzy slownik typo wpotrzebnych do odczytania przykladu. To znaczy
+#format tfrrecords trzeba parsowac, a by parsowac trzeba wiedziec jakiego
+# typu sa te dane. 
 def tworz_slownik_typow_potrzebny_do_parsowania(nazwa_folderu):
     is_this_classification = wczytaj_json(nazwa_folderu + "/is_this_classification")
     lista_numerycznych = wczytaj_typy_numerycznych(nazwa_folderu)
@@ -221,9 +230,12 @@ def tworz_slownik_typow_potrzebny_do_parsowania(nazwa_folderu):
         read_features['l'] = tf.FixedLenFeature([1], dtype=tf.float32)
     return read_features
 
-#odczytuje dataset ale bez parsowania do sensownych rzeczy
-def odczytaj_dataset(nazwa_folderu):
+#odczytuje dataset ale bez parsowania do sensownych rzeczy. 
+#tutaj zachodzi tasowanie. 
+def odczytaj_dataset(nazwa_folderu, czy_shuffle, buffer_size):
     dataset = tf.data.TFRecordDataset(nazwa_folderu + '/dane')
+    if czy_shuffle:
+        dataset = dataset.shuffle(buffer_size)
     return dataset
 
 #zwraca odczytany dataset ( to znaczy odczytuje
@@ -231,12 +243,12 @@ def odczytaj_dataset(nazwa_folderu):
 # ). kazdy przyklad odczytany odzielnie
 # wiec jest to dosc wolna metoda
 #zwraca zarowno ignorowane jak i nie ignorowane
-def parsuj_po_jednym_all(nazwa_folderu):
+def parsuj_po_jednym_all(nazwa_folderu, czy_shuffle, buffer_size):
     read_features = tworz_slownik_typow_potrzebny_do_parsowania(nazwa_folderu)
     def parsuj(serialized_example):
         return tf.parse_single_example(serialized=serialized_example,
                                         features=read_features)
-    dataset = odczytaj_dataset(nazwa_folderu)
+    dataset = odczytaj_dataset(nazwa_folderu, czy_shuffle, buffer_size)
     dataset = dataset.map(parsuj)
     return dataset
 
@@ -244,12 +256,12 @@ def parsuj_po_jednym_all(nazwa_folderu):
 # od razu wiele przykladow i zwraca batch. argument ile_threadow
 # oznacza na ilu threadach ma zachodzic ten proces parsowania
 #zwraca zarowno ignorowane jak i nie ignorowane. 
-def parsuj_i_batchuj_all(nazwa_folderu, batch_size, ile_threadow):
+def parsuj_i_batchuj_all(nazwa_folderu, batch_size, ile_threadow, czy_shuffle, buffer_size):
     read_features = tworz_slownik_typow_potrzebny_do_parsowania(nazwa_folderu)
     def parsuj(serialized_examples):
          return tf.parse_example(serialized=serialized_examples,
                                         features=read_features)
-    dataset = odczytaj_dataset(nazwa_folderu)
+    dataset = odczytaj_dataset(nazwa_folderu, czy_shuffle, buffer_size)
     dataset= dataset.batch(batch_size)
     dataset = dataset.map(parsuj, num_parallel_calls = ile_threadow)
     return dataset
@@ -264,12 +276,12 @@ def drop_ignored(s):
 # ). kazdy przyklad odczytany odzielnie
 # wiec jest to dosc wolna metoda
 #zwraca tylko nie ignorowane
-def parsuj_po_jednym_not_ignored(nazwa_folderu):
+def parsuj_po_jednym_not_ignored(nazwa_folderu, czy_shuffle, buffer_size):
     read_features = tworz_slownik_typow_potrzebny_do_parsowania(nazwa_folderu)
     def parsuj(serialized_example):
         return tf.parse_single_example(serialized=serialized_example,
                                         features=read_features)
-    dataset = odczytaj_dataset(nazwa_folderu)
+    dataset = odczytaj_dataset(nazwa_folderu, czy_shuffle, buffer_size)
     dataset = dataset.map(parsuj)
     dataset = dataset.map(drop_ignored)
     return dataset
@@ -278,12 +290,12 @@ def parsuj_po_jednym_not_ignored(nazwa_folderu):
 # od razu wiele przykladow i zwraca batch. argument ile_threadow
 # oznacza na ilu threadach ma zachodzic ten proces parsowania
 #zwraca zarowno tylko nie ignorowane
-def parsuj_i_batchuj_not_ignored(nazwa_folderu, batch_size, ile_threadow):
+def parsuj_i_batchuj_not_ignored(nazwa_folderu, batch_size, ile_threadow, czy_shuffle, buffer_size):
     read_features = tworz_slownik_typow_potrzebny_do_parsowania(nazwa_folderu)
     def parsuj(serialized_examples):
          return tf.parse_example(serialized=serialized_examples,
                                         features=read_features)
-    dataset = odczytaj_dataset(nazwa_folderu)
+    dataset = odczytaj_dataset(nazwa_folderu, czy_shuffle, buffer_size)
     dataset= dataset.batch(batch_size)
     dataset = dataset.map(parsuj, num_parallel_calls = ile_threadow)
     dataset = dataset.map(drop_ignored)
