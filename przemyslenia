@@ -1,9 +1,9 @@
 
 co musi byc?
 
-moja kalsa zapisywacz musi zostac wzbogacona by zapisywac featchery ciagle, featchery kategoryczne, obserwowane
+moja kalsa io_TFRecords musi zostac wzbogacona by zapisywac featchery ciagle, featchery kategoryczne, obserwowane
 rzeczy zarowno ciagle jak i kategoryczne, label i tak dalej. 
-zapisywacz musi wiedziec czy label jest kategoryczny czy moze ciagly
+io_TFRecords musi wiedziec czy label jest kategoryczny czy moze ciagly
 
 model pewnie musi wiedziec z danych czy ma przewidywac ciagle czy moze nie ciagle
 
