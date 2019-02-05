@@ -218,16 +218,29 @@ def train(source_of_data, model_folder, steps, perform_cache, batch_size = 128,
 #evaluates model. arguments are 
 # - source_of_data is folder created with module io_TFRecords
 # - model_folder is an folder created with functinon create_model_folder. 
-# - steps is number of batches that we want to train on
 # - perform_cache, batch_size, perform_shuffle, num_of_threads, perform_repeat, buffer_size like
 #       in function input_fn
-def evaluate(source_of_data, model_folder, steps, batch_size = 128,  
+def evaluate(source_of_data, model_folder, batch_size = 128,  
         num_of_threads = 1):
     model = load_model(model_folder)
     return model.evaluate(
         input_fn = input_fn(source_of_data, model_folder, batch_size,  
          perform_shuffle = False, num_of_threads = num_of_threads, perform_repeat = False, buffer_size = 100,
          perform_cache = False)
+    )
+
+# makes predictions out of our model. arguments are 
+# - source_of_data is folder created with module io_TFRecords
+# - model_folder is an folder created with functinon create_model_folder. 
+# - steps is number of batches that we want to train on
+# - perform_cache, batch_size, perform_shuffle, num_of_threads, perform_repeat, buffer_size like
+#       in function input_fn
+def predict(source_of_data, model_folder, batch_size = 128):
+    model = load_model(model_folder)
+    return model.predict(
+        input_fn = input_fn(source_of_data, model_folder, batch_size,  
+         perform_shuffle = False, perform_repeat = False, buffer_size = 100,
+         perform_cache = False,num_of_threads = 1)
     )
 
 
